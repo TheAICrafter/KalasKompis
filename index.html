@@ -15,17 +15,6 @@
         .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
     </style>
-    <script>
-        // Tailwind config - kör efter att Tailwind laddats
-        window.addEventListener('DOMContentLoaded', function() {
-            if (window.tailwind) {
-                tailwind.config = {
-                    darkMode: 'class',
-                    theme: { extend: {} }
-                }
-            }
-        });
-    </script>
 </head>
 <body>
     <div id="root"></div>
@@ -79,7 +68,7 @@
                 }
             };
 
-            // UPPDATERAD FUNKTION SOM VERKLIGEN FUNGERAR
+            // FUNGERANDE AKTIVITETS-GENERATOR
             const generateUniqueActivities = () => {
                 const primaryInterest = formData.interests[0];
                 console.log('🎯 Generating activities for:', primaryInterest);
@@ -193,7 +182,7 @@
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 
                 const theme = getThemeBasedOnInterests();
-                const activities = generateUniqueActivities(); // ANVÄNDER NYA FUNKTIONEN
+                const activities = generateUniqueActivities();
                 
                 setAiResponse({
                     theme,
