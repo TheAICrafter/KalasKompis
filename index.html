@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KalasKompis - Test</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #fdf2f8 0%, #f3e8ff 50%, #eff6ff 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .title {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ec4899, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #6b7280;
+            font-size: 1.2rem;
+        }
+        .form-section {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .form-label {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 15px;
+            display: block;
+        }
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            box-sizing: border-box;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #ec4899;
+        }
+        .interests-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .interest-btn {
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .interest-btn:hover {
+            border-color: #ec4899;
+            transform: translateY(-2px);
+        }
+        .interest-btn.selected {
+            border-color: #ec4899;
+            background: #fce7f3;
+        }
+        .interest-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        .interest-label {
+            font-weight: 600;
+            color: #374151;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(45deg, #ec4899, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(236, 72, 153, 0.3);
+        }
+        .submit-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .results {
+            display: none;
+        }
+        .results.show {
+            display: block;
+        }
+        .result-section {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            display: none;
+        }
+        .loading.show {
+            display: block;
+        }
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid #fce7f3;
+            border-top: 6px solid #ec4899;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1 class="title">🎉 KalasKompis ✨</h1>
+            <p class="subtitle">Din AI-assistent för det perfekta barnkalaset</p>
+            <p style="color: #9ca3af;">Planera ett komplett kalas på under 2 minuter!</p>
+        </div>
+
+        <!-- Form -->
+        <div id="form-container">
+            <form id="party-form">
+                <!-- Ålder -->
+                <div class="form-section">
+                    <label class="form-label">🎂 Barnets ålder</label>
+                    <input type="number" class="form-input" id="age" min="1" max="18" placeholder="Ange ålder..." required>
+                </div>
+
+                <!-- Intressen -->
+                <div class="form-section">
+                    <label class="form-label">❤️ Barnets intressen (välj minst ett)</label>
+                    <div class="interests-grid">
+                        <div class="interest-btn" data-interest="dinosaurier">
+                            <div class="interest-icon">🦕</div>
+                            <div class="interest-label">Dinosaurier</div>
+                        </div>
+                        <div class="interest-btn" data-interest="prinsessor">
+                            <div class="interest-icon">👑</div>
+                            <div class="interest-label">Prinsessor</div>
+                        </div>
+                        <div class="interest-btn" data-interest="minecraft">
+                            <div class="interest-icon">⛏️</div>
+                            <div class="interest-label">Minecraft</div>
+                        </div>
+                        <div class="interest-btn" data-interest="pyssel">
+                            <div class="interest-icon">🎨</div>
+                            <div class="interest-label">Pyssel</div>
+                        </div>
+                        <div class="interest-btn" data-interest="musik">
+                            <div class="interest-icon">🎵</div>
+                            <div class="interest-label">Musik</div>
+                        </div>
+                        <div class="interest-btn" data-interest="dans">
+                            <div class="interest-icon">💃</div>
+                            <div class="interest-label">Dans</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Antal barn -->
+                <div class="form-section">
+                    <label class="form-label">👥 Antal barn som bjuds</label>
+                    <input type="number" class="form-input" id="guestCount" min="1" max="30" placeholder="Antal barn..." required>
+                </div>
+
+                <!-- Budget -->
+                <div class="form-section">
+                    <label class="form-label">💰 Budget</label>
+                    <div class="interests-grid">
+                        <div class="interest-btn" data-budget="lag">
+                            <div class="interest-icon">💰</div>
+                            <div class="interest-label">Låg budget</div>
+                            <div style="font-size: 0.9rem; color: #6b7280;">300-500 kr</div>
+                        </div>
+                        <div class="interest-btn" data-budget="medel">
+                            <div class="interest-icon">💸</div>
+                            <div class="interest-label">Medel budget</div>
+                            <div style="font-size: 0.9rem; color: #6b7280;">500-1000 kr</div>
+                        </div>
+                        <div class="interest-btn" data-budget="hog">
+                            <div class="interest-icon">🏆</div>
+                            <div class="interest-label">Hög budget</div>
+                            <div style="font-size: 0.9rem; color: #6b7280;">1000+ kr</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plats -->
+                <div class="form-section">
+                    <label class="form-label">📍 Var ska kalaset hållas?</label>
+                    <div class="interests-grid">
+                        <div class="interest-btn" data-location="hemma">
+                            <div class="interest-icon">🏠</div>
+                            <div class="interest-label">Hemma</div>
+                        </div>
+                        <div class="interest-btn" data-location="utomhus">
+                            <div class="interest-icon">🌳</div>
+                            <div class="interest-label">Utomhus</div>
+                        </div>
+                        <div class="interest-btn" data-location="lokal">
+                            <div class="interest-icon">🏢</div>
+                            <div class="interest-label">I lokal</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submit-btn" disabled>
+                    ✨ Skapa mitt drömkalas! 🎉
+                </button>
+            </form>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <h2 style="color: #374151; margin-bottom: 20px;">Skapar ditt perfekta kalas... ✨</h2>
+            <div style="color: #6b7280;">
+                <p>🎨 Väljer det bästa temat...</p>
+                <p>🗓️ Planerar aktiviteter...</p>
+                <p>🧁 Förbereder menyn...</p>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="results">
+            <div class="result-section">
+                <h2 style="color: #374151; margin-bottom: 20px;">🎉 Ditt Drömkalas!</h2>
+                <div id="theme-result">
+                    <h3 id="theme-name" style="color: #374151; margin-bottom: 10px;"></h3>
+                    <p id="theme-description" style="color: #6b7280;"></p>
+                </div>
+            </div>
+
+            <!-- Schema -->
+            <div class="result-section">
+                <h3 style="color: #374151; margin-bottom: 20px;">🗓️ Schema</h3>
+                <div id="schedule-result"></div>
+            </div>
+
+            <!-- Meny -->
+            <div class="result-section">
+                <h3 style="color: #374151; margin-bottom: 20px;">🍽️ Meny</h3>
+                <div id="menu-result"></div>
+            </div>
+
+            <!-- Aktiviteter -->
+            <div class="result-section">
+                <h3 style="color: #374151; margin-bottom: 20px;">🎮 Aktiviteter</h3>
+                <div id="activities-result"></div>
+            </div>
+
+            <!-- Inköpslista -->
+            <div class="result-section">
+                <h3 style="color: #374151; margin-bottom: 20px;">🛒 Inköpslista</h3>
+                <div id="shopping-result"></div>
+            </div>
+
+            <!-- Inbjudan -->
+            <div class="result-section">
+                <h3 style="color: #374151; margin-bottom: 20px;">💌 Färdig inbjudan</h3>
+                <div id="invitation-result" style="background: #f9fafb; padding: 20px; border-radius: 12px; border: 2px dashed #d1d5db; white-space: pre-wrap; font-family: monospace; color: #374151;"></div>
+                <button onclick="copyInvitation()" style="margin-top: 15px; padding: 10px 20px; background: #ec4899; color: white; border: none; border-radius: 8px; cursor: pointer;">📋 Kopiera text</button>
+            </div>
+
+            <!-- Föräldratips -->
+            <div class="result-section">
+                <h3 style="color: #374151; margin-bottom: 20px;">❤️ Föräldratips</h3>
+                <div id="tips-result"></div>
+            </div>
+
+            <button onclick="resetForm()" class="submit-btn" style="background: linear-gradient(45deg, #6b7280, #4b5563);">
+                ← Planera nytt kalas
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let selectedInterests = [];
+        let selectedBudget = '';
+        let selectedLocation = '';
+        
+        // Interest selection
+        document.querySelectorAll('.interest-btn[data-interest]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const interest = btn.dataset.interest;
+                if (selectedInterests.includes(interest)) {
+                    selectedInterests = selectedInterests.filter(i => i !== interest);
+                    btn.classList.remove('selected');
+                } else {
+                    selectedInterests.push(interest);
+                    btn.classList.add('selected');
+                }
+                checkFormValid();
+            });
+        });
+
+        // Budget selection
+        document.querySelectorAll('.interest-btn[data-budget]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove previous selection
+                document.querySelectorAll('.interest-btn[data-budget]').forEach(b => b.classList.remove('selected'));
+                // Add new selection
+                btn.classList.add('selected');
+                selectedBudget = btn.dataset.budget;
+                checkFormValid();
+            });
+        });
+
+        // Location selection
+        document.querySelectorAll('.interest-btn[data-location]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove previous selection
+                document.querySelectorAll('.interest-btn[data-location]').forEach(b => b.classList.remove('selected'));
+                // Add new selection
+                btn.classList.add('selected');
+                selectedLocation = btn.dataset.location;
+                checkFormValid();
+            });
+        });
+
+        // Form validation
+        function checkFormValid() {
+            const age = document.getElementById('age').value;
+            const guestCount = document.getElementById('guestCount').value;
+            const submitBtn = document.getElementById('submit-btn');
+            
+            console.log('Validation check:');
+            console.log('Age:', age);
+            console.log('Interests:', selectedInterests);
+            console.log('Guest count:', guestCount);
+            console.log('Budget:', selectedBudget);
+            console.log('Location:', selectedLocation);
+            
+            const isValid = !!(age && selectedInterests.length > 0 && guestCount && selectedBudget && selectedLocation);
+            console.log('Is valid:', isValid);
+            
+            if (isValid) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '✨ Skapa mitt drömkalas! 🎉';
+                submitBtn.style.background = 'linear-gradient(45deg, #ec4899, #8b5cf6)';
+                submitBtn.style.cursor = 'pointer';
+                console.log('Form is valid - button enabled');
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '✨ Fyll i alla fält för att fortsätta ✨';
+                submitBtn.style.background = '#9ca3af';
+                submitBtn.style.cursor = 'not-allowed';
+                console.log('Form is invalid - button disabled');
+            }
+        }
+
+        document.getElementById('age').addEventListener('input', checkFormValid);
+        document.getElementById('guestCount').addEventListener('input', checkFormValid);
+
+        // Form submission
+        document.getElementById('party-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Show loading
+            document.getElementById('form-container').style.display = 'none';
+            document.getElementById('loading').classList.add('show');
+            
+            // Simulate AI processing
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            
+            // Generate results
+            generateResults();
+            
+            // Show results
+            document.getElementById('loading').classList.remove('show');
+            document.getElementById('results').classList.add('show');
+        });
+
+        function generateResults() {
+            const primaryInterest = selectedInterests[0];
+            
+            const themes = {
+                'dinosaurier': {
+                    name: '🦕 Jurassic Adventure',
+                    description: 'En spännande resa till dinosauriernas värld med fossil-grävning och dino-äventyr!'
+                },
+                'prinsessor': {
+                    name: '👑 Magisk Prinsessbal',
+                    description: 'Ett kungligt kalas med glitter, kronor och sagolika äventyr!'
+                },
+                'minecraft': {
+                    name: '⛏️ Blocky Builder Adventure',
+                    description: 'Bygg, utforska och skapa i en kubisk värld full av äventyr!'
+                },
+                'musik': {
+                    name: '🎵 Musikalisk Magi',
+                    description: 'Ett rytmiskt kalas fyllt med sång, musik och kreativitet!'
+                },
+                'dans': {
+                    name: '💃 Dansparti Deluxe',
+                    description: 'Ett energifyllt kalas med musik, dans och rörelse!'
+                }
+            };
+
+            const activities = {
+                'dinosaurier': [
+                    { name: 'Paleontolog-fossil-grävning', description: 'Gräv fram dinosauriefossil i sandlådan eller kartonger med sand. Varje paleontolog får hitta sin egen dinosaurie-skatt!', duration: '25 min' },
+                    { name: 'Jättedino-äggsjakt', description: 'Hitta gömda "dinosaurieägg" (stora plastägg med leksaker) runt omkring trädgården eller rummet', duration: '20 min' },
+                    { name: 'Vulkan-explosion-experiment', description: 'Bygg vulkaner av lera och titta på när de "exploderar" med bakpulver och ättika - säkert och superkul!', duration: '30 min' }
+                ],
+                'minecraft': [
+                    { name: 'Bygg din Minecraft-värld', description: 'Använd kartonger, Lego eller klossar för att bygga egna Minecraft-strukturer. Skapa hus, slott eller hela städer tillsammans!', duration: '35 min' },
+                    { name: 'Creeper-kurragömma', description: 'En rolig variant av kurragömma där "creepers" (med gröna ballonger) försöker hitta andra spelare innan de "exploderar"', duration: '20 min' },
+                    { name: 'Redstone-pusselutmaning', description: 'Enkla logik-pussel och problemlösning inspirerat av Minecraft redstone-kretsar med verkliga material', duration: '25 min' }
+                ],
+                'musik': [
+                    { name: 'Instrumentmaking-workshop', description: 'Tillverka egna instrument av återvinning: shakers av ris, trummor av konservburkar och gitarrer av gummiband', duration: '30 min' },
+                    { name: 'Melodisk skattjakt', description: 'Musik-baserad skattjakt där ledtrådar döljs under olika låtar och rytmer som barnen ska känna igen', duration: '25 min' },
+                    { name: 'Kalas-orkester & karaoke', description: 'Använd era hemmagjorda instrument och sjung favoritsånger tillsammans i en stor orkester', duration: '20 min' }
+                ],
+                'dans': [
+                    { name: 'Koreografi-workshop', description: 'Lär er enkla danssteg tillsammans och skapa en unik gruppkoreografi som alla får uppträda med!', duration: '30 min' },
+                    { name: 'Stoppdans-utmaning', description: 'Musical chairs med olika dansteman - när musiken stannar, frys i roliga poser!', duration: '20 min' },
+                    { name: 'Dans-battle royale', description: 'Vänlig tävling där olika lag visar sina coolaste moves och alla vinner priser', duration: '25 min' }
+                ]
+            };
+
+            const theme = themes[primaryInterest] || {
+                name: '🎉 Magisk Födelsedagsäventyr',
+                description: 'Ett personligt kalas anpassat efter barnets intressen!'
+            };
+
+            const activityList = activities[primaryInterest] || [
+                { name: 'Temabaserad skattjakt', description: 'Anpassad efter barnets intressen', duration: '25 min' },
+                { name: 'Kreativ workshop', description: 'Skapa något kul att ta hem', duration: '30 min' }
+            ];
+
+            // Display theme
+            document.getElementById('theme-name').textContent = theme.name;
+            document.getElementById('theme-description').textContent = theme.description;
+
+            // Generate schedule
+            const schedule = [
+                { time: '14:00', activity: 'Välkomst & fri lek', duration: '30 min' },
+                { time: '14:30', activity: 'Temalekar & aktiviteter', duration: '45 min' },
+                { time: '15:15', activity: 'Fikapaus med tårta', duration: '30 min' },
+                { time: '15:45', activity: 'Skattjakt eller grupplekar', duration: '30 min' },
+                { time: '16:15', activity: 'Presenter & avslutning', duration: '15 min' }
+            ];
+
+            const scheduleContainer = document.getElementById('schedule-result');
+            scheduleContainer.innerHTML = '';
+            schedule.forEach(item => {
+                const scheduleDiv = document.createElement('div');
+                scheduleDiv.style.cssText = 'background: #dbeafe; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px;';
+                scheduleDiv.innerHTML = `
+                    <div style="font-weight: bold; color: #1e40af; min-width: 80px;">${item.time}</div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; color: #374151;">${item.activity}</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">${item.duration}</div>
+                    </div>
+                `;
+                scheduleContainer.appendChild(scheduleDiv);
+            });
+
+            // Generate menu based on budget
+            const generateMenuByBudget = () => {
+                const guestCount = parseInt(document.getElementById('guestCount').value);
+                
+                if (selectedBudget === 'lag') {
+                    return {
+                        main: 'Enkla smörgåsar och korv',
+                        snacks: ['Chips', 'Kex', 'Äppelklyftor'],
+                        cake: 'Hemmagjord kladdkaka eller muffins',
+                        drinks: ['Kranvatten med citron', 'Hemmagjord saft']
+                    };
+                } else if (selectedBudget === 'medel') {
+                    return {
+                        main: 'Mini-hamburgare och vegetariska wraps',
+                        snacks: ['Fruktspett', 'Popcorn', 'Ostbitar med druvor'],
+                        cake: 'Temaanpassad tårta från bageri',
+                        drinks: ['Barnvänlig fruktdryck', 'Vatten med fruktsmak']
+                    };
+                } else { // hög budget
+                    return {
+                        main: 'Gourmet mini-burgare, sushi för barn, veganska alternativ',
+                        snacks: ['Exotiska frukter', 'Nötmix', 'Ostbricka med druvor', 'Smoothie-bar'],
+                        cake: 'Specialdesignad tårta + cupcakes + glassbuffé',
+                        drinks: ['Premium barnvänlig juice', 'Bubbelvatten med smak', 'Smoothies']
+                    };
+                }
+            };
+
+            // Generate shopping list based on budget
+            const generateShoppingByBudget = () => {
+                if (selectedBudget === 'lag') {
+                    return [
+                        { category: 'Dekorationer', items: ['Ballonger från Dollarstore (5st)', 'Hemmagjorda serpentiner', 'Färgad papper'] },
+                        { category: 'Mat & Dryck', items: ['Bröd och pålägg (50kr)', 'Korv (30kr)', 'Chips (25kr)', 'Bakningsingredienser (40kr)'] },
+                        { category: 'Aktiviteter', items: ['Hemmagjorda presentpåsar', 'Papper och kritor', 'Smågodisar (30kr)'] },
+                        { category: 'Praktiskt', items: ['Papperstallrikar (20kr)', 'Plastbestick (15kr)'] }
+                    ];
+                } else if (selectedBudget === 'medel') {
+                    return [
+                        { category: 'Dekorationer', items: ['Ballonger (10st) - 80kr', 'Serpentiner - 40kr', 'Temadekor - 120kr', 'Plastduk - 30kr'] },
+                        { category: 'Mat & Dryck', items: ['Hamburgare + tillbehör (200kr)', 'Frukt för spett (80kr)', 'Tårta från bageri (250kr)', 'Drycker (100kr)'] },
+                        { category: 'Aktiviteter', items: ['Presentpåsar + innehåll (150kr)', 'Pyssel-material (100kr)', 'Presenter för aktiviteter (80kr)'] },
+                        { category: 'Praktiskt', items: ['Papperstallrikar (40kr)', 'Muggar (35kr)', 'Servetter (25kr)', 'Plastbestick (30kr)'] }
+                    ];
+                } else { // hög budget
+                    return [
+                        { category: 'Dekorationer', items: ['Premium ballonger + heliumtank (300kr)', 'Professionell temadekor (500kr)', 'LED-ljusslingor (200kr)', 'Bakgrund för fotos (400kr)'] },
+                        { category: 'Mat & Dryck', items: ['Cateringservice (800kr)', 'Specialtårta + extras (600kr)', 'Premium drycker + smoothie-ingredienser (300kr)', 'Godisbuffé (250kr)'] },
+                        { category: 'Aktiviteter', items: ['Lyxiga presentpåsar (300kr)', 'Professionellt pyssel-kit (250kr)', 'Hyrda aktiviteter/animatör (800kr)', 'Stora presenter (400kr)'] },
+                        { category: 'Praktiskt', items: ['Riktigt porslin/glas (hyrd) (200kr)', 'Servering och städning (300kr)', 'Dukar och dekorationer (150kr)'] }
+                    ];
+                }
+            };
+
+            // Adjust activities based on budget  
+            const adjustActivitiesByBudget = (baseActivities) => {
+                if (selectedBudget === 'lag') {
+                    // Förenkla aktiviteterna
+                    return baseActivities.map(activity => ({
+                        ...activity,
+                        description: activity.description.replace(/Lego/g, 'kartonger').replace(/köpta material/g, 'hemmagjorda saker')
+                    })).slice(0, 2); // Bara 2 aktiviteter
+                } else if (selectedBudget === 'medel') {
+                    return baseActivities; // Standard aktiviteter
+                } else { // hög budget
+                    // Lägg till extra premium aktivitet
+                    const extraActivity = {
+                        name: 'BONUS: Professionell aktivitet',
+                        description: 'Hyrd animatör eller specialaktivitet som trollkarl, djurshow eller interaktiv show anpassad efter temat',
+                        duration: '30 min'
+                    };
+                    return [...baseActivities, extraActivity];
+                }
+            };
+
+            const menu = generateMenuByBudget();
+
+            const menuContainer = document.getElementById('menu-result');
+            menuContainer.innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <h4 style="color: #374151; margin-bottom: 10px;">🍽️ Huvudrätt</h4>
+                        <p style="color: #6b7280; margin-bottom: 15px;">${menu.main}</p>
+                        <h4 style="color: #374151; margin-bottom: 10px;">🍿 Snacks</h4>
+                        <ul style="color: #6b7280; margin: 0; padding-left: 20px;">
+                            ${menu.snacks.map(snack => `<li>${snack}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="color: #374151; margin-bottom: 10px;">🎂 Efterrätt</h4>
+                        <p style="color: #6b7280; margin-bottom: 15px;">${menu.cake}</p>
+                        <h4 style="color: #374151; margin-bottom: 10px;">🥤 Drycker</h4>
+                        <ul style="color: #6b7280; margin: 0; padding-left: 20px;">
+                            ${menu.drinks.map(drink => `<li>${drink}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+            // Display activities (adjusted by budget)
+            const adjustedActivities = adjustActivitiesByBudget(activityList);
+            const activitiesContainer = document.getElementById('activities-result');
+            activitiesContainer.innerHTML = '';
+            adjustedActivities.forEach(activity => {
+                const activityDiv = document.createElement('div');
+                activityDiv.style.cssText = 'background: #f3e8ff; padding: 20px; border-radius: 12px; margin-bottom: 15px;';
+                activityDiv.innerHTML = `
+                    <h4 style="color: #374151; margin: 0 0 10px 0; font-weight: 600;">${activity.name}</h4>
+                    <p style="color: #6b7280; margin: 0 0 10px 0;">${activity.description}</p>
+                    <span style="color: #8b5cf6; font-weight: 600; font-size: 0.9rem;">⏱️ ${activity.duration}</span>
+                `;
+                activitiesContainer.appendChild(activityDiv);
+            });
+
+            // Generate shopping list (budget-based)
+            const shoppingList = generateShoppingByBudget();
+
+            const shoppingContainer = document.getElementById('shopping-result');
+            shoppingContainer.innerHTML = '';
+            shoppingList.forEach(category => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.style.cssText = 'background: #fed7aa; padding: 15px; border-radius: 12px; margin-bottom: 15px;';
+                categoryDiv.innerHTML = `
+                    <h4 style="color: #374151; margin: 0 0 10px 0; font-weight: 600;">${category.category}</h4>
+                    <ul style="color: #6b7280; margin: 0; padding-left: 20px;">
+                        ${category.items.map(item => `<li>✓ ${item}</li>`).join('')}
+                    </ul>
+                `;
+                shoppingContainer.appendChild(categoryDiv);
+            });
+
+            // Generate invitation
+            const invitation = `🎉 ${theme.name.split(' ')[0]} INBJUDAN TILL KALAS! ${theme.name.split(' ')[0]} 🎉
+
+Hej!
+
+Du är inbjuden till [Barnets namn]s födelsedagskalas!
+
+📅 Datum: [Datum]
+🕐 Tid: 14:00-16:30
+📍 Plats: [Adress]
+🎭 Tema: ${theme.name}
+
+Vi kommer att ha roliga lekar, gott fika och massor av kul!
+
+OSA senast [datum] till [telefonnummer]
+
+Hälsningar,
+[Föräldrarnas namn]
+
+PS: Inga presenter behövs - din närvaro är den bästa presenten! 💝`;
+
+            document.getElementById('invitation-result').textContent = invitation;
+
+            // Generate parent tips
+            const parentTips = [
+                '🎯 Förbered aktiviteter i förväg - ha backup-planer redo!',
+                '🧹 Gör en snabb städning innan gästerna kommer, men stressa inte över perfection',
+                '👥 Dela upp stora grupper i mindre team för bättre kontroll',
+                '📱 Informera andra föräldrar om hämtningstid redan i inbjudan',
+                '🎁 Ha extra små presenter ifall något barn blir ledset',
+                '💧 Håll extra kläder tillgängliga för spillage och lek',
+                '📷 Glöm inte att dokumentera de roliga stunderna!'
+            ];
+
+            const tipsContainer = document.getElementById('tips-result');
+            tipsContainer.innerHTML = '';
+            parentTips.forEach((tip, index) => {
+                const tipDiv = document.createElement('div');
+                tipDiv.style.cssText = 'background: #fecaca; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: start; gap: 15px;';
+                tipDiv.innerHTML = `
+                    <div style="background: #ef4444; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; flex-shrink: 0;">${index + 1}</div>
+                    <p style="color: #374151; margin: 0;">${tip}</p>
+                `;
+                tipsContainer.appendChild(tipDiv);
+            });
+        }
+
+        function copyInvitation() {
+            const invitationText = document.getElementById('invitation-result').textContent;
+            navigator.clipboard.writeText(invitationText).then(() => {
+                alert('Inbjudan kopierad till urklipp!');
+            });
+        }
+
+        function resetForm() {
+            document.getElementById('results').classList.remove('show');
+            document.getElementById('form-container').style.display = 'block';
+            
+            // Reset form
+            document.getElementById('party-form').reset();
+            selectedInterests = [];
+            selectedBudget = '';
+            document.querySelectorAll('.interest-btn').forEach(btn => btn.classList.remove('selected'));
+            checkFormValid();
+        }
+    </script>
+</body>
+</html>
