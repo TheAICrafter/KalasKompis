@@ -272,9 +272,41 @@
                 </div>
             </div>
 
+            <!-- Schema -->
+            <div class="result-section">
+                <h3 style="color: #374151; margin-bottom: 20px;">🗓️ Schema</h3>
+                <div id="schedule-result"></div>
+            </div>
+
+            <!-- Meny -->
+            <div class="result-section">
+                <h3 style="color: #374151; margin-bottom: 20px;">🍽️ Meny</h3>
+                <div id="menu-result"></div>
+            </div>
+
+            <!-- Aktiviteter -->
             <div class="result-section">
                 <h3 style="color: #374151; margin-bottom: 20px;">🎮 Aktiviteter</h3>
                 <div id="activities-result"></div>
+            </div>
+
+            <!-- Inköpslista -->
+            <div class="result-section">
+                <h3 style="color: #374151; margin-bottom: 20px;">🛒 Inköpslista</h3>
+                <div id="shopping-result"></div>
+            </div>
+
+            <!-- Inbjudan -->
+            <div class="result-section">
+                <h3 style="color: #374151; margin-bottom: 20px;">💌 Färdig inbjudan</h3>
+                <div id="invitation-result" style="background: #f9fafb; padding: 20px; border-radius: 12px; border: 2px dashed #d1d5db; white-space: pre-wrap; font-family: monospace; color: #374151;"></div>
+                <button onclick="copyInvitation()" style="margin-top: 15px; padding: 10px 20px; background: #ec4899; color: white; border: none; border-radius: 8px; cursor: pointer;">📋 Kopiera text</button>
+            </div>
+
+            <!-- Föräldratips -->
+            <div class="result-section">
+                <h3 style="color: #374151; margin-bottom: 20px;">❤️ Föräldratips</h3>
+                <div id="tips-result"></div>
             </div>
 
             <button onclick="resetForm()" class="submit-btn" style="background: linear-gradient(45deg, #6b7280, #4b5563);">
@@ -333,24 +365,28 @@
             const guestCount = document.getElementById('guestCount').value;
             const submitBtn = document.getElementById('submit-btn');
             
-            console.log('Validation check:', {
-                age: age,
-                interests: selectedInterests.length,
-                guestCount: guestCount,
-                budget: selectedBudget,
-                location: selectedLocation
-            });
+            console.log('Validation check:');
+            console.log('Age:', age);
+            console.log('Interests:', selectedInterests);
+            console.log('Guest count:', guestCount);
+            console.log('Budget:', selectedBudget);
+            console.log('Location:', selectedLocation);
             
-            if (age && selectedInterests.length > 0 && guestCount && selectedBudget && selectedLocation) {
+            const isValid = !!(age && selectedInterests.length > 0 && guestCount && selectedBudget && selectedLocation);
+            console.log('Is valid:', isValid);
+            
+            if (isValid) {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '✨ Skapa mitt drömkalas! 🎉';
                 submitBtn.style.background = 'linear-gradient(45deg, #ec4899, #8b5cf6)';
                 submitBtn.style.cursor = 'pointer';
+                console.log('Form is valid - button enabled');
             } else {
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '✨ Fyll i alla fält för att fortsätta ✨';
                 submitBtn.style.background = '#9ca3af';
                 submitBtn.style.cursor = 'not-allowed';
+                console.log('Form is invalid - button disabled');
             }
         }
 
@@ -404,24 +440,24 @@
 
             const activities = {
                 'dinosaurier': [
-                    { name: 'Paleontolog-fossil-grävning', description: 'Gräv fram dinosauriefossil i sandlådan!', duration: '25 min' },
-                    { name: 'Jättedino-äggsjakt', description: 'Hitta gömda dinosaurieägg runt omkring', duration: '20 min' },
-                    { name: 'Vulkan-experiment', description: 'Bygg vulkaner som "exploderar" säkert', duration: '30 min' }
+                    { name: 'Paleontolog-fossil-grävning', description: 'Gräv fram dinosauriefossil i sandlådan eller kartonger med sand. Varje paleontolog får hitta sin egen dinosaurie-skatt!', duration: '25 min' },
+                    { name: 'Jättedino-äggsjakt', description: 'Hitta gömda "dinosaurieägg" (stora plastägg med leksaker) runt omkring trädgården eller rummet', duration: '20 min' },
+                    { name: 'Vulkan-explosion-experiment', description: 'Bygg vulkaner av lera och titta på när de "exploderar" med bakpulver och ättika - säkert och superkul!', duration: '30 min' }
                 ],
                 'minecraft': [
-                    { name: 'Bygg Minecraft-värld', description: 'Använd kartonger och Lego för att skapa strukturer', duration: '35 min' },
-                    { name: 'Creeper-kurragömma', description: 'Rolig variant av kurragömma med ballonger', duration: '20 min' },
-                    { name: 'Redstone-pussel', description: 'Logikpussel inspirerat av Minecraft', duration: '25 min' }
+                    { name: 'Bygg din Minecraft-värld', description: 'Använd kartonger, Lego eller klossar för att bygga egna Minecraft-strukturer. Skapa hus, slott eller hela städer tillsammans!', duration: '35 min' },
+                    { name: 'Creeper-kurragömma', description: 'En rolig variant av kurragömma där "creepers" (med gröna ballonger) försöker hitta andra spelare innan de "exploderar"', duration: '20 min' },
+                    { name: 'Redstone-pusselutmaning', description: 'Enkla logik-pussel och problemlösning inspirerat av Minecraft redstone-kretsar med verkliga material', duration: '25 min' }
                 ],
                 'musik': [
-                    { name: 'Instrumentmaking', description: 'Gör instrument av återvinning', duration: '30 min' },
-                    { name: 'Melodisk skattjakt', description: 'Musik-baserad skattjakt', duration: '25 min' },
-                    { name: 'Kalas-orkester', description: 'Sjung tillsammans med hemmagjorda instrument', duration: '20 min' }
+                    { name: 'Instrumentmaking-workshop', description: 'Tillverka egna instrument av återvinning: shakers av ris, trummor av konservburkar och gitarrer av gummiband', duration: '30 min' },
+                    { name: 'Melodisk skattjakt', description: 'Musik-baserad skattjakt där ledtrådar döljs under olika låtar och rytmer som barnen ska känna igen', duration: '25 min' },
+                    { name: 'Kalas-orkester & karaoke', description: 'Använd era hemmagjorda instrument och sjung favoritsånger tillsammans i en stor orkester', duration: '20 min' }
                 ],
                 'dans': [
-                    { name: 'Koreografi-workshop', description: 'Lär er danssteg och skapa gruppkoreografi', duration: '30 min' },
-                    { name: 'Stoppdans-utmaning', description: 'Musical chairs med dansteman', duration: '20 min' },
-                    { name: 'Dans-battle', description: 'Vänlig tävling med coola moves', duration: '25 min' }
+                    { name: 'Koreografi-workshop', description: 'Lär er enkla danssteg tillsammans och skapa en unik gruppkoreografi som alla får uppträda med!', duration: '30 min' },
+                    { name: 'Stoppdans-utmaning', description: 'Musical chairs med olika dansteman - när musiken stannar, frys i roliga poser!', duration: '20 min' },
+                    { name: 'Dans-battle royale', description: 'Vänlig tävling där olika lag visar sina coolaste moves och alla vinner priser', duration: '25 min' }
                 ]
             };
 
@@ -435,13 +471,68 @@
                 { name: 'Kreativ workshop', description: 'Skapa något kul att ta hem', duration: '30 min' }
             ];
 
-            // Display results
+            // Display theme
             document.getElementById('theme-name').textContent = theme.name;
             document.getElementById('theme-description').textContent = theme.description;
 
+            // Generate schedule
+            const schedule = [
+                { time: '14:00', activity: 'Välkomst & fri lek', duration: '30 min' },
+                { time: '14:30', activity: 'Temalekar & aktiviteter', duration: '45 min' },
+                { time: '15:15', activity: 'Fikapaus med tårta', duration: '30 min' },
+                { time: '15:45', activity: 'Skattjakt eller grupplekar', duration: '30 min' },
+                { time: '16:15', activity: 'Presenter & avslutning', duration: '15 min' }
+            ];
+
+            const scheduleContainer = document.getElementById('schedule-result');
+            scheduleContainer.innerHTML = '';
+            schedule.forEach(item => {
+                const scheduleDiv = document.createElement('div');
+                scheduleDiv.style.cssText = 'background: #dbeafe; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px;';
+                scheduleDiv.innerHTML = `
+                    <div style="font-weight: bold; color: #1e40af; min-width: 80px;">${item.time}</div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; color: #374151;">${item.activity}</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">${item.duration}</div>
+                    </div>
+                `;
+                scheduleContainer.appendChild(scheduleDiv);
+            });
+
+            // Generate menu
+            const isVegetarian = document.getElementById('guestCount').value > 8; // Simple logic
+            const menu = {
+                main: isVegetarian ? 'Vegetariska wraps med hummus' : 'Mini-hamburgare och korv',
+                snacks: ['Fruktspett', 'Popcorn', 'Ostbitar med druvor'],
+                cake: 'Temaanpassad tårta eller muffins',
+                drinks: ['Barnvänlig fruktdryck', 'Vatten med fruktsmak']
+            };
+
+            const menuContainer = document.getElementById('menu-result');
+            menuContainer.innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <h4 style="color: #374151; margin-bottom: 10px;">🍽️ Huvudrätt</h4>
+                        <p style="color: #6b7280; margin-bottom: 15px;">${menu.main}</p>
+                        <h4 style="color: #374151; margin-bottom: 10px;">🍿 Snacks</h4>
+                        <ul style="color: #6b7280; margin: 0; padding-left: 20px;">
+                            ${menu.snacks.map(snack => `<li>${snack}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="color: #374151; margin-bottom: 10px;">🎂 Efterrätt</h4>
+                        <p style="color: #6b7280; margin-bottom: 15px;">${menu.cake}</p>
+                        <h4 style="color: #374151; margin-bottom: 10px;">🥤 Drycker</h4>
+                        <ul style="color: #6b7280; margin: 0; padding-left: 20px;">
+                            ${menu.drinks.map(drink => `<li>${drink}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+            // Display activities
             const activitiesContainer = document.getElementById('activities-result');
             activitiesContainer.innerHTML = '';
-            
             activityList.forEach(activity => {
                 const activityDiv = document.createElement('div');
                 activityDiv.style.cssText = 'background: #f3e8ff; padding: 20px; border-radius: 12px; margin-bottom: 15px;';
@@ -451,6 +542,81 @@
                     <span style="color: #8b5cf6; font-weight: 600; font-size: 0.9rem;">⏱️ ${activity.duration}</span>
                 `;
                 activitiesContainer.appendChild(activityDiv);
+            });
+
+            // Generate shopping list
+            const shoppingList = [
+                { category: 'Dekorationer', items: ['Ballonger (10st)', 'Serpentiner', 'Temadekor', 'Plastduk'] },
+                { category: 'Mat & Dryck', items: ['Se menyförslaget ovan'] },
+                { category: 'Aktiviteter', items: ['Presentpåsar', 'Pyssel-material', 'Små presenter för skattjakt'] },
+                { category: 'Praktiskt', items: ['Papperstallrikar', 'Muggar', 'Servetter', 'Plastbestick'] }
+            ];
+
+            const shoppingContainer = document.getElementById('shopping-result');
+            shoppingContainer.innerHTML = '';
+            shoppingList.forEach(category => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.style.cssText = 'background: #fed7aa; padding: 15px; border-radius: 12px; margin-bottom: 15px;';
+                categoryDiv.innerHTML = `
+                    <h4 style="color: #374151; margin: 0 0 10px 0; font-weight: 600;">${category.category}</h4>
+                    <ul style="color: #6b7280; margin: 0; padding-left: 20px;">
+                        ${category.items.map(item => `<li>✓ ${item}</li>`).join('')}
+                    </ul>
+                `;
+                shoppingContainer.appendChild(categoryDiv);
+            });
+
+            // Generate invitation
+            const invitation = `🎉 ${theme.name.split(' ')[0]} INBJUDAN TILL KALAS! ${theme.name.split(' ')[0]} 🎉
+
+Hej!
+
+Du är inbjuden till [Barnets namn]s födelsedagskalas!
+
+📅 Datum: [Datum]
+🕐 Tid: 14:00-16:30
+📍 Plats: [Adress]
+🎭 Tema: ${theme.name}
+
+Vi kommer att ha roliga lekar, gott fika och massor av kul!
+
+OSA senast [datum] till [telefonnummer]
+
+Hälsningar,
+[Föräldrarnas namn]
+
+PS: Inga presenter behövs - din närvaro är den bästa presenten! 💝`;
+
+            document.getElementById('invitation-result').textContent = invitation;
+
+            // Generate parent tips
+            const parentTips = [
+                '🎯 Förbered aktiviteter i förväg - ha backup-planer redo!',
+                '🧹 Gör en snabb städning innan gästerna kommer, men stressa inte över perfection',
+                '👥 Dela upp stora grupper i mindre team för bättre kontroll',
+                '📱 Informera andra föräldrar om hämtningstid redan i inbjudan',
+                '🎁 Ha extra små presenter ifall något barn blir ledset',
+                '💧 Håll extra kläder tillgängliga för spillage och lek',
+                '📷 Glöm inte att dokumentera de roliga stunderna!'
+            ];
+
+            const tipsContainer = document.getElementById('tips-result');
+            tipsContainer.innerHTML = '';
+            parentTips.forEach((tip, index) => {
+                const tipDiv = document.createElement('div');
+                tipDiv.style.cssText = 'background: #fecaca; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: start; gap: 15px;';
+                tipDiv.innerHTML = `
+                    <div style="background: #ef4444; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; flex-shrink: 0;">${index + 1}</div>
+                    <p style="color: #374151; margin: 0;">${tip}</p>
+                `;
+                tipsContainer.appendChild(tipDiv);
+            });
+        }
+
+        function copyInvitation() {
+            const invitationText = document.getElementById('invitation-result').textContent;
+            navigator.clipboard.writeText(invitationText).then(() => {
+                alert('Inbjudan kopierad till urklipp!');
             });
         }
 
