@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KalasKompis - AI-Powered Birthday Party Planner</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        .animate-spin { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+    </style>
+    <script>
+        // Tailwind config - kör efter att Tailwind laddats
+        window.addEventListener('DOMContentLoaded', function() {
+            if (window.tailwind) {
+                tailwind.config = {
+                    darkMode: 'class',
+                    theme: { extend: {} }
+                }
+            }
+        });
+    </script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { PartyPopper, Sparkles, Clock, ShoppingCart, Users, MapPin, Heart, Moon, Sun, Download, Star, Crown, Gamepad2, Palette, ChefHat, Gift, CheckCircle, Calendar, Home, TreePine, Building } = lucide;
+
+        const KalasKompis = () => {
+            const [currentStep, setCurrentStep] = useState('form');
+            const [formData, setFormData] = useState({
+                age: '', interests: [], guestCount: '', budget: '', location: '', foodPrefs: ''
+            });
+            const [aiResponse, setAiResponse] = useState(null);
+            const [isGenerating, setIsGenerating] = useState(false);
+            const [darkMode, setDarkMode] = useState(false);
+            const [showUpgrade, setShowUpgrade] = useState(false);
+
+            const interests = [
+                { id: 'dinosaurier', label: 'Dinosaurier', icon: '🦕' },
+                { id: 'prinsessor', label: 'Prinsessor', icon: '👑' },
+                { id: 'minecraft', label: 'Minecraft', icon: '⛏️' },
+                { id: 'pyssel', label: 'Pyssel', icon: '🎨' },
+                { id: 'fotboll', label: 'Fotboll', icon: '⚽' },
+                { id: 'bilar', label: 'Bilar', icon: '🚗' },
+                { id: 'djur', label: 'Djur', icon: '🐨' },
+                { id: 'superhjaltar', label: 'Superhjältar', icon: '🦸' },
+                { id: 'musik', label: 'Musik', icon: '🎵' },
+                { id: 'dans', label: 'Dans', icon: '💃' }
+            ];
+
+            const budgetOptions = [
+                { id: 'lag', label: 'Låg budget', desc: '300-500 kr', icon: '💰' },
+                { id: 'medel', label: 'Medel budget', desc: '500-1000 kr', icon: '💸' },
+                { id: 'hog', label: 'Hög budget', desc: '1000+ kr', icon: '🏆' }
+            ];
+
+            const locationOptions = [
+                { id: 'hemma', label: 'Hemma', icon: Home },
+                { id: 'utomhus', label: 'Utomhus', icon: TreePine },
+                { id: 'lokal', label: 'I lokal', icon: Building }
+            ];
+
+            const toggleDarkMode = () => {
+                const newDarkMode = !darkMode;
+                setDarkMode(newDarkMode);
+                if (newDarkMode) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            };
+
+            // UPPDATERAD FUNKTION SOM VERKLIGEN FUNGERAR
+            const generateUniqueActivities = () => {
+                const primaryInterest = formData.interests[0];
+                console.log('🎯 Generating activities for:', primaryInterest);
+                
+                if (primaryInterest === 'minecraft') {
+                    return [
+                        { name: 'Bygg din Minecraft-värld', description: 'Använd kartonger, Lego eller klossar för att bygga egna Minecraft-strukturer. Skapa hus, slott eller hela städer tillsammans!', duration: '35 min' },
+                        { name: 'Creeper-kurragömma', description: 'En rolig variant av kurragömma där "creepers" (med gröna ballonger) försöker hitta andra spelare innan de "exploderar"', duration: '20 min' },
+                        { name: 'Redstone-pusselutmaning', description: 'Enkla logik-pussel och problemlösning inspirerat av Minecraft redstone-kretsar med verkliga material', duration: '25 min' }
+                    ];
+                }
+                
+                if (primaryInterest === 'dans') {
+                    return [
+                        { name: 'Koreografi-workshop', description: 'Lär er enkla danssteg tillsammans och skapa en unik gruppkoreografi som alla får uppträda med!', duration: '30 min' },
+                        { name: 'Stoppdans-utmaning', description: 'Musical chairs med olika dansteman - när musiken stannar, frys i roliga poser!', duration: '20 min' },
+                        { name: 'Dans-battle royale', description: 'Vänlig tävling där olika lag visar sina coolaste moves och alla vinner priser', duration: '25 min' }
+                    ];
+                }
+                
+                if (primaryInterest === 'musik') {
+                    return [
+                        { name: 'Instrumentmaking-workshop', description: 'Tillverka egna instrument av återvinning: shakers av ris, trummor av konservburkar och gitarrer av gummiband', duration: '30 min' },
+                        { name: 'Melodisk skattjakt', description: 'Musik-baserad skattjakt där ledtrådar döljs under olika låtar och rytmer som barnen ska känna igen', duration: '25 min' },
+                        { name: 'Kalas-orkester & karaoke', description: 'Använd era hemmagjorda instrument och sjung favoritsånger tillsammans i en stor orkester', duration: '20 min' }
+                    ];
+                }
+                
+                if (primaryInterest === 'dinosaurier') {
+                    return [
+                        { name: 'Paleontolog-fossil-grävning', description: 'Gräv fram äkta "dinosauriefossil" gömda i sandlådan eller kartonger. Varje paleontolog får hitta sin egen dinosaurie-skatt!', duration: '25 min' },
+                        { name: 'Jättedino-äggsjakt', description: 'Hitta gömda "dinosaurieägg" (stora plastägg med leksaker) runt omkring trädgården eller rummet', duration: '20 min' },
+                        { name: 'Vulkan-explosion-experiment', description: 'Bygg vulkaner av lera och titta på när de "exploderar" med bakpulver och ättika - säkert och superkul!', duration: '30 min' }
+                    ];
+                }
+                
+                if (primaryInterest === 'prinsessor') {
+                    return [
+                        { name: 'Kunglig hovbal', description: 'Eleganta danser och vacker musik där alla får vara prinsessor och prinsar med äkta hovmaner!', duration: '20 min' },
+                        { name: 'Magiska trollstavar-workshop', description: 'Skapa egna trollstavar med glitter, band och ädelstenar - varje stav får sina egna unika magiska krafter', duration: '25 min' },
+                        { name: 'Rädda den förtrollade enhörningen', description: 'Magiskt äventyr där barnen hjälps åt att lösa gåtor och besvärjelser för att befria enhörningen', duration: '30 min' }
+                    ];
+                }
+
+                if (primaryInterest === 'fotboll') {
+                    return [
+                        { name: 'Mini-fotbollsturnering', description: 'Små lag tävlar i olika fotbollsutmaningar: dribling, precisionsskott och lagarbete', duration: '30 min' },
+                        { name: 'Fotbolls-hinderlopp', description: 'Dribbla genom koner, skjut på mål och genomför olika koordinationsövningar', duration: '25 min' },
+                        { name: 'Målvakts-utmaning', description: 'Alla får prova att vara målvakt och rädda skott från olika avstånd och vinklar', duration: '20 min' }
+                    ];
+                }
+
+                if (primaryInterest === 'pyssel') {
+                    return [
+                        { name: 'Mega-pysselstation', description: 'Rotera mellan 4 stationer: måleri, pärlor, klipp & klistra och lera-modellering', duration: '40 min' },
+                        { name: 'Designa kalaskronor', description: 'Varje barn skapar sin helt personliga krona med glitter, pärlor och dekorationer', duration: '25 min' },
+                        { name: 'Kollektiv konstvägg', description: 'Alla bidrar till en stor målning som födelsedagsbarnet får behålla som minne', duration: '20 min' }
+                    ];
+                }
+
+                if (primaryInterest === 'bilar') {
+                    return [
+                        { name: 'Bygg racerbana', description: 'Skapa episka racerbanor med maskeringstejp på golvet för alla leksaksbilar', duration: '25 min' },
+                        { name: 'Bil-tvättstation', description: 'Tvätta riktiga cyklar/sparkcyklar utomhus (perfekt sommarvädersaktivitet)', duration: '30 min' },
+                        { name: 'Grand Prix-tävling', description: 'Spännande racing med radiostyrda bilar eller snabba pull-back racers', duration: '20 min' }
+                    ];
+                }
+
+                if (primaryInterest === 'djur') {
+                    return [
+                        { name: 'Djur-charades', description: 'Härma olika djur medan andra gissar - från elefanter till katter!', duration: '20 min' },
+                        { name: 'Bygg djurhem', description: 'Använd kartonger och material för att skapa perfekta hem åt olika djur', duration: '30 min' },
+                        { name: 'Djurljud-bingo', description: 'Lyssna på djurljud och markera på bingo-kort - vinnaren får djurfigur', duration: '25 min' }
+                    ];
+                }
+
+                if (primaryInterest === 'superhjaltar') {
+                    return [
+                        { name: 'Superhjälte-träningsläger', description: 'Hinderbana där barnen tränar sina "superkrafter" och räddar världen', duration: '30 min' },
+                        { name: 'Designa superhjälte-identitet', description: 'Skapa egna emblem, masker och bestäm sina superhjälte-krafter', duration: '25 min' },
+                        { name: 'Rädda staden-mission', description: 'Teamwork-lek där alla hjältar löser viktiga uppdrag tillsammans', duration: '25 min' }
+                    ];
+                }
+                
+                // Fallback
+                return [
+                    { name: 'Temabaserad skattjakt', description: 'Anpassad efter barnets specifika intressen med ledtrådar och små presenter', duration: '25 min' },
+                    { name: 'Kreativ workshop', description: 'Skapa något kul relaterat till barnets intressen att ta hem som minne från kalaset', duration: '30 min' },
+                    { name: 'Interaktiv grupplek', description: 'Roliga aktiviteter som passar för alla åldrar och anpassas efter valt tema', duration: '20 min' }
+                ];
+            };
+
+            const getThemeBasedOnInterests = () => {
+                const primaryInterest = formData.interests[0];
+                const themes = {
+                    'dinosaurier': { name: 'Jurassic Adventure', description: 'En spännande resa till dinosauriernas värld med fossil-grävning och dino-äventyr!', colors: ['#8B4513', '#228B22', '#FF4500'], emoji: '🦕' },
+                    'prinsessor': { name: 'Magisk Prinsessbal', description: 'Ett kungligt kalas med glitter, kronor och sagolika äventyr!', colors: ['#FFB6C1', '#9370DB', '#FFD700'], emoji: '👑' },
+                    'minecraft': { name: 'Blocky Builder Adventure', description: 'Bygg, utforska och skapa i en kubisk värld full av äventyr!', colors: ['#228B22', '#8B4513', '#4169E1'], emoji: '⛏️' },
+                    'dans': { name: 'Dansparti Deluxe', description: 'Ett energifyllt kalas med musik, dans och rörelse!', colors: ['#FF1493', '#00CED1', '#FFD700'], emoji: '💃' },
+                    'musik': { name: 'Musikalisk Magi', description: 'Ett rytmiskt kalas fyllt med sång, musik och kreativitet!', colors: ['#9370DB', '#FF69B4', '#32CD32'], emoji: '🎵' }
+                };
+                
+                return themes[primaryInterest] || {
+                    name: 'Magisk Födelsedagsäventyr', description: 'Ett personligt kalas anpassat efter barnets unika intressen!', 
+                    colors: ['#FF69B4', '#00CED1', '#FFD700'], emoji: '🎉'
+                };
+            };
+
+            const generateAIResponse = async () => {
+                setIsGenerating(true);
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                const theme = getThemeBasedOnInterests();
+                const activities = generateUniqueActivities(); // ANVÄNDER NYA FUNKTIONEN
+                
+                setAiResponse({
+                    theme,
+                    schedule: [
+                        { time: '14:00', activity: 'Välkomst & fri lek', duration: '30 min' },
+                        { time: '14:30', activity: 'Temalekar & aktiviteter', duration: '45 min' },
+                        { time: '15:15', activity: 'Fikapaus med tårta', duration: '30 min' },
+                        { time: '15:45', activity: 'Skattjakt eller grupplekar', duration: '30 min' },
+                        { time: '16:15', activity: 'Presenter & avslutning', duration: '15 min' }
+                    ],
+                    menu: {
+                        main: formData.foodPrefs.includes('vegetariskt') ? 'Vegetariska wraps med hummus' : 'Mini-hamburgare och korv',
+                        snacks: ['Fruktspett', 'Popcorn', 'Ostbitar med druvor'],
+                        cake: 'Temaanpassad tårta eller muffins',
+                        drinks: ['Barnvänlig fruktdryck', 'Vatten med fruktsmak']
+                    },
+                    activities,
+                    shoppingList: [
+                        { category: 'Dekorationer', items: ['Ballonger (10st)', 'Serpentiner', 'Temadekor', 'Plastduk'] },
+                        { category: 'Mat & Dryck', items: ['Se menyförslaget ovan'] },
+                        { category: 'Aktiviteter', items: ['Presentpåsar', 'Pyssel-material', 'Små presenter för skattjakt'] },
+                        { category: 'Praktiskt', items: ['Papperstallrikar', 'Muggar', 'Servetter', 'Plastbestick'] }
+                    ],
+                    invitation: `🎉 ${theme.emoji} INBJUDAN TILL KALAS! ${theme.emoji} 🎉\n\nHej!\n\nDu är inbjuden till [Barnets namn]s födelsedagskalas!\n\n📅 Datum: [Datum]\n🕐 Tid: 14:00-16:30\n📍 Plats: [Adress]\n🎭 Tema: ${theme.name}\n\nVi kommer att ha roliga lekar, gott fika och massor av kul!\n\nOSA senast [datum] till [telefonnummer]\n\nHälsningar,\n[Föräldrarnas namn]\n\nPS: Inga presenter behövs - din närvaro är den bästa presenten! 💝`,
+                    parentTips: [
+                        '🎯 Förbered aktiviteter i förväg - ha backup-planer redo!',
+                        '🧹 Gör en snabb städning innan gästerna kommer, men stressa inte över perfection',
+                        '👥 Dela upp stora grupper i mindre team för bättre kontroll',
+                        '📱 Informera andra föräldrar om hämtningstid redan i inbjudan',
+                        '🎁 Ha extra små presenter ifall något barn blir ledset',
+                        '💧 Håll extra kläder tillgängliga för spillage och lek',
+                        '📷 Glöm inte att dokumentera de roliga stunderna!'
+                    ]
+                });
+                
+                setIsGenerating(false);
+                setCurrentStep('results');
+                setTimeout(() => setShowUpgrade(true), 3000);
+            };
+
+            const handleInterestToggle = (interestId) => {
+                setFormData(prev => ({
+                    ...prev,
+                    interests: prev.interests.includes(interestId)
+                        ? prev.interests.filter(id => id !== interestId)
+                        : [...prev.interests, interestId]
+                }));
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const isValid = formData.age && formData.interests.length > 0 && formData.guestCount && formData.budget && formData.location;
+                if (isValid) {
+                    generateAIResponse();
+                } else {
+                    alert('Fyll i alla obligatoriska fält för att fortsätta!');
+                }
+            };
+
+            const AnimatedText = ({ text, delay = 0 }) => {
+                const [displayText, setDisplayText] = useState('');
+                const [currentIndex, setCurrentIndex] = useState(0);
+
+                useEffect(() => {
+                    if (currentIndex < text.length) {
+                        const timer = setTimeout(() => {
+                            setDisplayText(prev => prev + text[currentIndex]);
+                            setCurrentIndex(prev => prev + 1);
+                        }, 20 + delay);
+                        return () => clearTimeout(timer);
+                    }
+                }, [currentIndex, text, delay]);
+
+                return React.createElement('span', null, displayText);
+            };
+
+            if (currentStep === 'form') {
+                return React.createElement('div', {
+                    className: `min-h-screen transition-colors duration-300 ${darkMode ? 'dark bg-gray-900' : 'bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50'}`
+                }, 
+                React.createElement('div', { className: "container mx-auto px-4 py-8 max-w-4xl" },
+                    React.createElement('div', { className: "text-center mb-8" },
+                        React.createElement('button', {
+                            onClick: toggleDarkMode,
+                            className: "absolute top-4 right-4 p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+                        }, darkMode ? React.createElement(Sun, { className: "w-5 h-5" }) : React.createElement(Moon, { className: "w-5 h-5" })),
+                        
+                        React.createElement('div', { className: "flex items-center justify-center gap-3 mb-4" },
+                            React.createElement(PartyPopper, { className: "w-8 h-8 text-pink-500" }),
+                            React.createElement('h1', { className: "text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent" }, "KalasKompis"),
+                            React.createElement(Sparkles, { className: "w-8 h-8 text-purple-500" })
+                        ),
+                        
+                        React.createElement('p', { className: "text-lg text-gray-600 dark:text-gray-300 mb-2" }, "Din AI-assistent för det perfekta barnkalaset"),
+                        React.createElement('p', { className: "text-sm text-gray-500 dark:text-gray-400" }, "Planera ett komplett kalas på under 2 minuter! 🎉")
+                    ),
+
+                    React.createElement('form', { onSubmit: handleSubmit, className: "space-y-8" },
+                        // Age input
+                        React.createElement('div', { className: "bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg" },
+                            React.createElement('label', { className: "block text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4" }, "🎂 Barnets ålder"),
+                            React.createElement('input', {
+                                type: "number", min: "1", max: "18", value: formData.age,
+                                onChange: (e) => setFormData(prev => ({ ...prev, age: e.target.value })),
+                                className: "w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-pink-400 focus:outline-none text-lg",
+                                placeholder: "Ange ålder...", required: true
+                            })
+                        ),
+
+                        // Interests
+                        React.createElement('div', { className: "bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg" },
+                            React.createElement('label', { className: "block text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4" }, "❤️ Barnets intressen (välj minst ett)"),
+                            React.createElement('div', { className: "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3" },
+                                interests.map((interest) =>
+                                    React.createElement('button', {
+                                        key: interest.id, type: "button", onClick: () => handleInterestToggle(interest.id),
+                                        className: `p-3 rounded-xl border-2 transition-all duration-200 ${
+                                            formData.interests.includes(interest.id)
+                                                ? 'border-pink-400 bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300'
+                                                : 'border-gray-200 dark:border-gray-600 hover:border-pink-300 dark:hover:border-pink-400'
+                                        }`
+                                    },
+                                        React.createElement('div', { className: "text-2xl mb-1" }, interest.icon),
+                                        React.createElement('div', { className: "text-sm font-medium text-gray-700 dark:text-gray-200" }, interest.label)
+                                    )
+                                )
+                            )
+                        ),
+
+                        // Guest Count
+                        React.createElement('div', { className: "bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg" },
+                            React.createElement('label', { className: "block text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4" }, "👥 Antal barn som bjuds"),
+                            React.createElement('input', {
+                                type: "number", min: "1", max: "30", value: formData.guestCount,
+                                onChange: (e) => setFormData(prev => ({ ...prev, guestCount: e.target.value })),
+                                className: "w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-pink-400 focus:outline-none text-lg",
+                                placeholder: "Antal barn...", required: true
+                            })
+                        ),
+
+                        // Budget
+                        React.createElement('div', { className: "bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg" },
+                            React.createElement('label', { className: "block text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4" }, "💰 Budget"),
+                            React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-3 gap-4" },
+                                budgetOptions.map((option) =>
+                                    React.createElement('button', {
+                                        key: option.id, type: "button", onClick: () => setFormData(prev => ({ ...prev, budget: option.id })),
+                                        className: `p-4 rounded-xl border-2 transition-all duration-200 ${
+                                            formData.budget === option.id ? 'border-pink-400 bg-pink-100 dark:bg-pink-900/30' : 'border-gray-200 dark:border-gray-600 hover:border-pink-300'
+                                        }`
+                                    },
+                                        React.createElement('div', { className: "text-2xl mb-2" }, option.icon),
+                                        React.createElement('div', { className: "font-semibold text-gray-700 dark:text-gray-200" }, option.label),
+                                        React.createElement('div', { className: "text-sm text-gray-500 dark:text-gray-400" }, option.desc)
+                                    )
+                                )
+                            )
+                        ),
+
+                        // Location
+                        React.createElement('div', { className: "bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg" },
+                            React.createElement('label', { className: "block text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4" }, "📍 Var ska kalaset hållas?"),
+                            React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-3 gap-4" },
+                                locationOptions.map((option) => {
+                                    const IconComponent = option.icon;
+                                    return React.createElement('button', {
+                                        key: option.id, type: "button", onClick: () => setFormData(prev => ({ ...prev, location: option.id })),
+                                        className: `p-4 rounded-xl border-2 transition-all duration-200 ${
+                                            formData.location === option.id ? 'border-pink-400 bg-pink-100 dark:bg-pink-900/30' : 'border-gray-200 dark:border-gray-600 hover:border-pink-300'
+                                        }`
+                                    },
+                                        React.createElement(IconComponent, { className: "w-8 h-8 mx-auto mb-2 text-gray-600 dark:text-gray-300" }),
+                                        React.createElement('div', { className: "font-semibold text-gray-700 dark:text-gray-200" }, option.label)
+                                    );
+                                })
+                            )
+                        ),
+
+                        // Food Preferences
+                        React.createElement('div', { className: "bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg" },
+                            React.createElement('label', { className: "block text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4" }, "🍽️ Matpreferenser (valfritt)"),
+                            React.createElement('textarea', {
+                                value: formData.foodPrefs, onChange: (e) => setFormData(prev => ({ ...prev, foodPrefs: e.target.value })),
+                                className: "w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-pink-400 focus:outline-none",
+                                rows: "3", placeholder: "T.ex. vegetariskt, allergier, enkelt/snabbt..."
+                            })
+                        ),
+
+                        // Submit Button
+                        React.createElement('button', {
+                            type: "submit",
+                            className: `w-full py-4 px-8 rounded-2xl font-bold text-lg shadow-lg transition-all duration-300 flex items-center justify-center gap-3 ${
+                                !formData.age || formData.interests.length === 0 || !formData.guestCount || !formData.budget || !formData.location
+                                    ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                                    : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:shadow-xl hover:scale-105 cursor-pointer'
+                            }`
+                        },
+                            React.createElement(Sparkles, { className: "w-6 h-6" }),
+                            "Skapa mitt drömkalas!",
+                            React.createElement(PartyPopper, { className: "w-6 h-6" })
+                        )
+                    )
+                ));
+            }
+
+            if (isGenerating) {
+                return React.createElement('div', { className: `min-h-screen flex items-center justify-center ${darkMode ? 'dark bg-gray-900' : 'bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50'}` },
+                React.createElement('div', { className: "text-center" },
+                    React.createElement('div', { className: "relative" },
+                        React.createElement('div', { className: "w-32 h-32 mx-auto mb-8 relative" },
+                            React.createElement('div', { className: "absolute inset-0 rounded-full border-8 border-pink-200 dark:border-pink-800" }),
+                            React.createElement('div', { className: "absolute inset-0 rounded-full border-8 border-pink-500 border-t-transparent animate-spin" }),
+                            React.createElement('div', { className: "absolute inset-4 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center" },
+                                React.createElement(Sparkles, { className: "w-12 h-12 text-white animate-pulse" })
+                            )
+                        )
+                    ),
+                    
+                    React.createElement('h2', { className: "text-3xl font-bold text-gray-800 dark:text-white mb-4" }, "Skapar ditt perfekta kalas... ✨"),
+                    
+                    React.createElement('div', { className: "text-lg text-gray-600 dark:text-gray-300 space-y-2" },
+                        React.createElement('p', null, "🎨 Väljer det bästa temat..."),
+                        React.createElement('p', null, "🗓️ Planerar aktiviteter..."),
+                        React.createElement('p', null, "🧁 Förbereder menyn..."),
+                        React.createElement('p', null, "🎁 Fixar alla detaljer...")
+                    )
+                ));
+            }
+
+            return React.createElement('div', { className: `min-h-screen transition-colors duration-300 ${darkMode ? 'dark bg-gray-900' : 'bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50'}` },
+            React.createElement('div', { className: "container mx-auto px-4 py-8 max-w-6xl" },
+                // Header
+                React.createElement('div', { className: "text-center mb-8" },
+                    React.createElement('button', { onClick: toggleDarkMode, className: "absolute top-4 right-4 p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors" },
+                        darkMode ? React.createElement(Sun, { className: "w-5 h-5" }) : React.createElement(Moon, { className: "w-5 h-5" })
+                    ),
+                    
+                    React.createElement('div', { className: "flex items-center justify-center gap-3 mb-4" },
+                        React.createElement(PartyPopper, { className: "w-8 h-8 text-pink-500" }),
+                        React.createElement('h1', { className: "text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent" }, "Ditt Drömkalas!"),
+                        React.createElement(Sparkles, { className: "w-8 h-8 text-purple-500" })
+                    )
+                ),
+
+                // Theme Section
+                React.createElement('div', { className: "bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-8 shadow-lg mb-8" },
+                    React.createElement('div', { className: "flex items-center gap-3 mb-6" },
+                        React.createElement('div', { className: "text-4xl" }, aiResponse.theme.emoji),
+                        React.createElement('h2', { className: "text-2xl font-bold text-gray-800 dark:text-white" },
+                            React.createElement(AnimatedText, { text: aiResponse.theme.name })
+                        )
+                    ),
+                    
+                    React.createElement('p', { className: "text-lg text-gray-600 dark:text-gray-300 mb-4" },
+                        React.createElement(AnimatedText, { text: aiResponse.theme.description, delay: 1000 })
+                    ),
+                    
+                    React.createElement('div', { className: "flex gap-2" },
+                        aiResponse.theme.colors.map((color, index) =>
+                            React.createElement('div', {
+                                key: index,
+                                className: "w-8 h-8 rounded-full border-2 border-white shadow-md",
+                                style: { backgroundColor: color }
+                            })
+                        )
+                    )
+                ),
+
+                // Schedule
+                React.createElement('div', { className: "bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-8 shadow-lg mb-8" },
+                    React.createElement('div', { className: "flex items-center gap-3 mb-6" },
+                        React.createElement(Clock, { className: "w-6 h-6 text-blue-500" }),
+                        React.createElement('h2', { className: "text-2xl font-bold text-gray-800 dark:text-white" }, "Schema")
+                    ),
+                    
+                    React.createElement('div', { className: "space-y-4" },
+                        aiResponse.schedule.map((item, index) =>
+                            React.createElement('div', {
+                                key: index,
+                                className: "flex items-center gap-4 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20"
+                            },
+                                React.createElement('div', { className: "text-lg font-bold text-blue-600 dark:text-blue-400 min-w-[80px]" }, item.time),
+                                React.createElement('div', { className: "flex-1" },
+                                    React.createElement('div', { className: "font-semibold text-gray-800 dark:text-white" }, item.activity),
+                                    React.createElement('div', { className: "text-sm text-gray-600 dark:text-gray-400" }, item.duration)
+                                )
+                            )
+                        )
+                    )
+                ),
+
+                // Menu
+                React.createElement('div', { className: "bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-8 shadow-lg mb-8" },
+                    React.createElement('div', { className: "flex items-center gap-3 mb-6" },
+                        React.createElement(ChefHat, { className: "w-6 h-6 text-green-500" }),
+                        React.createElement('h2', { className: "text-2xl font-bold text-gray-800 dark:text-white" }, "Meny")
+                    ),
+                    
+                    React.createElement('div', { className: "grid md:grid-cols-2 gap-6" },
+                        React.createElement('div', null,
+                            React.createElement('h3', { className: "font-semibold text-gray-800 dark:text-white mb-2" }, "🍽️ Huvudrätt"),
+                            React.createElement('p', { className: "text-gray-600 dark:text-gray-300 mb-4" }, aiResponse.menu.main),
+                            
+                            React.createElement('h3', { className: "font-semibold text-gray-800 dark:text-white mb-2" }, "🍿 Snacks"),
+                            React.createElement('ul', { className: "text-gray-600 dark:text-gray-300 mb-4" },
+                                aiResponse.menu.snacks.map((snack, index) =>
+                                    React.createElement('li', { key: index }, `• ${snack}`)
+                                )
+                            )
+                        ),
+                        
+                        React.createElement('div', null,
+                            React.createElement('h3', { className: "font-semibold text-gray-800 dark:text-white mb-2" }, "🎂 Efterrätt"),
+                            React.createElement('p', { className: "text-gray-600 dark:text-gray-300 mb-4" }, aiResponse.menu.cake),
+                            
+                            React.createElement('h3', { className: "font-semibold text-gray-800 dark:text-white mb-2" }, "🥤 Drycker"),
+                            React.createElement('ul', { className: "text-gray-600 dark:text-gray-300" },
+                                aiResponse.menu.drinks.map((drink, index) =>
+                                    React.createElement('li', { key: index }, `• ${drink}`)
+                                )
+                            )
+                        )
+                    )
+                ),
+
+                // Activities
+                React.createElement('div', { className: "bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-8 shadow-lg mb-8" },
+                    React.createElement('div', { className: "flex items-center gap-3 mb-6" },
+                        React.createElement(Gamepad2, { className: "w-6 h-6 text-purple-500" }),
+                        React.createElement('h2', { className: "text-2xl font-bold text-gray-800 dark:text-white" }, "Lekar & Aktiviteter")
+                    ),
+                    
+                    React.createElement('div', { className: "space-y-4" },
+                        aiResponse.activities.map((activity, index) =>
+                            React.createElement('div', {
+                                key: index,
+                                className: "p-4 rounded-xl bg-purple-50 dark:bg-purple-900/20"
+                            },
+                                React.createElement('h3', { className: "font-semibold text-gray-800 dark:text-white mb-2" }, activity.name),
+                                React.createElement('p', { className: "text-gray-600 dark:text-gray-300 mb-2" }, activity.description),
+                                React.createElement('span', { className: "text-sm text-purple-600 dark:text-purple-400 font-medium" }, `⏱️ ${activity.duration}`)
+                            )
+                        )
+                    )
+                ),
+
+                // Shopping List
+                React.createElement('div', { className: "bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-8 shadow-lg mb-8" },
+                    React.createElement('div', { className: "flex items-center gap-3 mb-6" },
+                        React.createElement(ShoppingCart, { className: "w-6 h-6 text-orange-500" }),
+                        React.createElement('h2', { className: "text-2xl font-bold text-gray-800 dark:text-white" }, "Inköpslista")
+                    ),
+                    
+                    React.createElement('div', { className: "grid md:grid-cols-2 gap-6" },
+                        aiResponse.shoppingList.map((category, index) =>
+                            React.createElement('div', {
+                                key: index,
+                                className: "p-4 rounded-xl bg-orange-50 dark:bg-orange-900/20"
+                            },
+                                React.createElement('h3', { className: "font-semibold text-gray-800 dark:text-white mb-3" }, category.category),
+                                React.createElement('ul', { className: "space-y-2" },
+                                    category.items.map((item, itemIndex) =>
+                                        React.createElement('li', {
+                                            key: itemIndex,
+                                            className: "flex items-center gap-2 text-gray-600 dark:text-gray-300"
+                                        },
+                                            React.createElement(CheckCircle, { className: "w-4 h-4 text-green-500" }),
+                                            item
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                ),
+
+                // Invitation
+                React.createElement('div', { className: "bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-8 shadow-lg mb-8" },
+                    React.createElement('div', { className: "flex items-center gap-3 mb-6" },
+                        React.createElement(Gift, { className: "w-6 h-6 text-pink-500" }),
+                        React.createElement('h2', { className: "text-2xl font-bold text-gray-800 dark:text-white" }, "Färdig inbjudan")
+                    ),
+                    
+                    React.createElement('div', { className: "bg-gradient-to-br from-pink-100 to-purple-100 dark:from-pink-900/20 dark:to-purple-900/20 p-6 rounded-xl border-2 border-dashed border-pink-300 dark:border-pink-600" },
+                        React.createElement('pre', { className: "whitespace-pre-wrap text-gray-800 dark:text-gray-200 font-medium" }, aiResponse.invitation)
+                    ),
+                    
+                    React.createElement('button', { className: "mt-4 px-6 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors" }, "📋 Kopiera text")
+                ),
+
+                // Parent Tips
+                React.createElement('div', { className: "bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-8 shadow-lg mb-8" },
+                    React.createElement('div', { className: "flex items-center gap-3 mb-6" },
+                        React.createElement(Heart, { className: "w-6 h-6 text-red-500" }),
+                        React.createElement('h2', { className: "text-2xl font-bold text-gray-800 dark:text-white" }, "Föräldratips")
+                    ),
+                    
+                    React.createElement('div', { className: "space-y-3" },
+                        aiResponse.parentTips.map((tip, index) =>
+                            React.createElement('div', {
+                                key: index,
+                                className: "flex items-start gap-3 p-3 rounded-lg bg-red-50 dark:bg-red-900/20"
+                            },
+                                React.createElement('div', { className: "w-6 h-6 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0 mt-0.5" },
+                                    React.createElement('span', { className: "text-white text-sm font-bold" }, index + 1)
+                                ),
+                                React.createElement('p', { className: "text-gray-700 dark:text-gray-300" }, tip)
+                            )
+                        )
+                    )
+                ),
+
+                // Action Buttons
+                React.createElement('div', { className: "flex flex-col sm:flex-row gap-4 mb-8" },
+                    React.createElement('button', {
+                        onClick: () => setCurrentStep('form'),
+                        className: "flex-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 py-3 px-6 rounded-xl font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                    }, "← Planera nytt kalas"),
+                    
+                    React.createElement('button', { className: "flex-1 bg-blue-500 text-white py-3 px-6 rounded-xl font-semibold hover:bg-blue-600 transition-colors flex items-center justify-center gap-2" },
+                        React.createElement(Download, { className: "w-5 h-5" }),
+                        "Ladda ner som PDF"
+                    )
+                ),
+
+                // Upgrade Prompt
+                showUpgrade && React.createElement('div', { className: "fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" },
+                    React.createElement('div', { className: "bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full shadow-2xl" },
+                        React.createElement('div', { className: "text-center" },
+                            React.createElement('div', { className: "w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center" },
+                                React.createElement(Crown, { className: "w-8 h-8 text-white" })
+                            ),
+                            
+                            React.createElement('h3', { className: "text-2xl font-bold text-gray-800 dark:text-white mb-4" }, "Uppgradera till KalasKompis Plus!"),
+                            
+                            React.createElement('p', { className: "text-gray-600 dark:text-gray-300 mb-6" }, "Få tillgång till färdiga inköpslänkar, designade inbjudningar och mycket mer!"),
+                            
+                            React.createElement('div', { className: "space-y-3 mb-6 text-left" },
+                                React.createElement('div', { className: "flex items-center gap-3" },
+                                    React.createElement(Star, { className: "w-5 h-5 text-yellow-500" }),
+                                    React.createElement('span', { className: "text-gray-700 dark:text-gray-300" }, "Färdiga varukorgar med affiliate-länkar")
+                                ),
+                                React.createElement('div', { className: "flex items-center gap-3" },
+                                    React.createElement(Star, { className: "w-5 h-5 text-yellow-500" }),
+                                    React.createElement('span', { className: "text-gray-700 dark:text-gray-300" }, "Professionella inbjudningar (PDF)")
+                                ),
+                                React.createElement('div', { className: "flex items-center gap-3" },
+                                    React.createElement(Star, { className: "w-5 h-5 text-yellow-500" }),
+                                    React.createElement('span', { className: "text-gray-700 dark:text-gray-300" }, "Fler temavarianter")
+                                ),
+                                React.createElement('div', { className: "flex items-center gap-3" },
+                                    React.createElement(Star, { className: "w-5 h-5 text-yellow-500" }),
+                                    React.createElement('span', { className: "text-gray-700 dark:text-gray-300" }, "E-post med kalastips")
+                                )
+                            ),
+                            
+                            React.createElement('div', { className: "flex gap-3" },
+                                React.createElement('button', {
+                                    onClick: () => setShowUpgrade(false),
+                                    className: "flex-1 py-3 px-4 rounded-xl border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                }, "Inte nu"),
+                                React.createElement('button', { className: "flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold hover:from-yellow-500 hover:to-orange-600 transition-all" }, "Uppgradera nu!")
+                            )
+                        )
+                    )
+                )
+            ));
+        };
+
+        ReactDOM.render(React.createElement(KalasKompis), document.getElementById('root'));
+    </script>
+</body>
+</html>
