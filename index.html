@@ -1,1382 +1,418 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalaskollen</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding: 20px;
-        }
-        .logo {
-            font-size: 3rem;
-            font-weight: bold;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 10px;
-        }
-        .tagline {
-            font-size: 1.2rem;
-            color: #666;
-            margin-bottom: 5px;
-        }
-        .subtitle {
-            color: #888;
-        }
-        .form-section {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #333;
-        }
-        .input-field {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-            box-sizing: border-box;
-        }
-        .input-field:focus {
-            outline: none;
-            border-color: #ff6b6b;
-        }
-        .interests-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .interest-card {
-            padding: 15px;
-            border: 2px solid #ddd;
-            border-radius: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: white;
-            position: relative;
-        }
-        .interest-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        .interest-card.selected {
-            border-color: #ff6b6b;
-            background: #ffe5e5;
-        }
-        .interest-card.premium {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .interest-card.premium .lock-icon {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            font-size: 1rem;
-        }
-        .interest-emoji {
-            font-size: 2rem;
-            margin-bottom: 8px;
-            display: block;
-        }
-        .interest-name {
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        .theme-categories {
-            margin-bottom: 20px;
-        }
-        .category-header {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            padding: 10px 0;
-            border-bottom: 2px solid #eee;
-        }
-        .free-themes {
-            color: #28a745;
-        }
-        .premium-themes {
-            color: #6f42c1;
-        }
-        .budget-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-        .budget-card {
-            padding: 20px;
-            border: 2px solid #ddd;
-            border-radius: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: white;
-        }
-        .budget-card:hover {
-            transform: translateY(-2px);
-        }
-        .budget-card.selected {
-            border-color: #ff6b6b;
-            background: #ffe5e5;
-        }
-        .location-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-        }
-        .location-card {
-            padding: 20px;
-            border: 2px solid #ddd;
-            border-radius: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: white;
-        }
-        .location-card:hover {
-            transform: translateY(-2px);
-        }
-        .location-card.selected {
-            border-color: #ff6b6b;
-            background: #ffe5e5;
-        }
-        .submit-btn {
-            width: 100%;
-            padding: 20px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            border: none;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 30px;
-        }
-        .submit-btn.enabled {
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-            color: white;
-        }
-        .submit-btn.enabled:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-        .submit-btn.disabled {
-            background: #ccc;
-            color: #666;
-            cursor: not-allowed;
-        }
-        .loading {
-            text-align: center;
-            padding: 60px 20px;
-        }
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 6px solid #f3f3f3;
-            border-top: 6px solid #ff6b6b;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .results {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        .result-section {
-            margin-bottom: 40px;
-            padding: 25px;
-            background: #f8f9fa;
-            border-radius: 15px;
-            border-left: 5px solid #ff6b6b;
-        }
-        .result-section h3 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 1.4rem;
-        }
-        .activity-item {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        .activity-name {
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-        }
-        .activity-description {
-            color: #666;
-            margin-bottom: 10px;
-            line-height: 1.5;
-        }
-        .activity-instructions {
-            background: #e3f2fd;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            border-left: 4px solid #2196f3;
-        }
-        .activity-materials {
-            background: #f3e5f5;
-            padding: 10px;
-            border-radius: 8px;
-            margin: 10px 0;
-            font-size: 0.9rem;
-        }
-        .activity-duration {
-            color: #ff6b6b;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        .invitation-box {
-            background: #fff3cd;
-            border: 2px dashed #ffc107;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 15px 0;
-            position: relative;
-        }
-        .copy-btn {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 0.8rem;
-        }
-        .copy-btn:hover {
-            background: #218838;
-        }
-        .food-item {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .price-tag {
-            font-size: 1.2rem;
-        }
-        .accessories-item {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-        .new-party-btn {
-            background: linear-gradient(45deg, #28a745, #20c997);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 30px;
-            width: 100%;
-        }
-        .new-party-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        .premium-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .premium-modal-content {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            text-align: center;
-            max-width: 500px;
-            margin: 20px;
-        }
-        .premium-modal h3 {
-            color: #6f42c1;
-            margin-bottom: 20px;
-        }
-        .premium-features {
-            text-align: left;
-            margin: 20px 0;
-        }
-        .premium-features li {
-            margin-bottom: 10px;
-            color: #28a745;
-        }
-        .upgrade-btn {
-            background: linear-gradient(45deg, #6f42c1, #e83e8c);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            margin: 10px;
-        }
-        .close-modal-btn {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 10px;
-        }
-        .confirmation-message {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            border: 1px solid #c3e6cb;
-        }
-        .hidden {
-            display: none;
-        }
-        @media (max-width: 768px) {
-            .interests-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .budget-grid {
-                grid-template-columns: 1fr;
-            }
-            .location-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>KalasKollen – Barnkalasplaneraren</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            kalasbg: '#FAF7F2',
+            kalasblue: '#005DFF',
+            kalasyellow: '#FFD43B',
+            kalasmint: '#A8E6CF',
+            kalascoral: '#FF6F61',
+          },
+          fontFamily: {
+            'poppins': ['Poppins', 'sans-serif'],
+            'inter': ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html, body { min-height: 100%; background: #FAF7F2; font-family: 'Inter', sans-serif; }
+    .kalas-btn { transition: transform 0.17s, box-shadow 0.17s; box-shadow: 0 2px 8px rgba(0,93,255,0.07);}
+    .kalas-btn:hover { transform: scale(1.06) translateY(-2px); box-shadow: 0 6px 20px rgba(0,93,255,0.16);}
+    .kalas-theme-card {
+      transition: box-shadow 0.18s, transform 0.18s, border 0.18s, background 0.18s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 18px 0 rgba(0,93,255,0.11), 0 1.5px 4px 0 #FFD43B;
+      border: 2px solid #A8E6CF;
+      background: linear-gradient(110deg, #fff 60%, #A8E6CF22 100%);
+    }
+    .kalas-theme-card:hover:not(.locked), .kalas-theme-card.selected {
+      box-shadow: 0 8px 32px 0 rgba(0,93,255,0.17), 0 1.5px 4px 0 #FFD43B;
+      border-color: #005DFF;
+      z-index: 2;
+      background: #f0f8ff;
+    }
+    .locked { opacity: 0.55; pointer-events: auto; cursor: not-allowed; border-color: #FFD43B; }
+    .kalas-checkbox:checked + span { text-decoration: line-through; color: #A8E6CF; }
+    input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0;}
+    input[type="number"] { -moz-appearance: textfield;}
+    input:focus, select:focus { outline: 2px solid #005DFF !important; }
+    .kalas-invite { white-space: pre-line; background: #FAF7F2; border-radius: 1rem; border: 1.5px dashed #005DFF; padding: 1rem;}
+    .loading-spinner {
+      border: 6px solid #FFD43B;
+      border-top: 6px solid #005DFF;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      animation: spin 1.1s linear infinite;
+      margin: 0 auto 1.5rem auto;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }
+    .fade-in { animation: fadeIn 0.7s cubic-bezier(.4,0,.2,1) both; }
+    @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+  </style>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="logo">🎉 Kalaskollen</div>
-            <div class="tagline">Föräldralugnet börjar här.</div>
-            <div class="subtitle">Din AI-assistent för det perfekta barnkalaset</div>
+<body class="min-h-screen flex flex-col items-center bg-kalasbg">
+
+  <div id="kalas-app" class="w-full max-w-xl mx-auto px-2 py-8 flex flex-col items-center">
+
+    <!-- Header -->
+    <header class="w-full flex flex-col items-center mb-6">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-3xl">🎈</span>
+        <h1 class="font-poppins text-3xl font-semibold text-kalasblue tracking-tight drop-shadow" style="letter-spacing:-1px;">KalasKollen</h1>
+        <span class="text-3xl">🎉</span>
+      </div>
+      <div class="text-kalascoral font-inter text-base text-center">Planera ditt drömkalas på några sekunder!</div>
+    </header>
+
+    <main id="spa-content" class="w-full"></main>
+    <div id="loading-container" class="fixed inset-0 bg-[#FAF7F2ee] flex-col items-center justify-center z-50 hidden">
+      <div class="flex flex-col items-center justify-center h-full w-full">
+        <div class="loading-spinner"></div>
+        <h2 class="font-poppins text-xl text-kalasblue mb-2">Skapar ditt perfekta kalas... ✨</h2>
+        <div class="text-base text-gray-600 font-inter">
+          <p class="fade-in" style="animation-delay:0.1s">🎨 Väljer tema...</p>
+          <p class="fade-in" style="animation-delay:0.4s">🎲 Planerar aktiviteter...</p>
+          <p class="fade-in" style="animation-delay:0.7s">🧁 Förbereder meny...</p>
         </div>
-
-        <!-- Form -->
-        <div id="form-container">
-            <div class="form-section">
-                <div class="section-title">🎂 Barnets ålder</div>
-                <input type="number" class="input-field" id="age" placeholder="Ange ålder..." min="1" max="18">
-            </div>
-
-            <div class="form-section">
-                <div class="section-title">❤️ Barnets intressen</div>
-                <div class="theme-categories">
-                    <div class="category-header free-themes">🆓 Gratisteman</div>
-                    <div class="interests-grid" id="free-themes">
-                        <div class="interest-card" data-theme="musik">
-                            <span class="interest-emoji">🎵</span>
-                            <div class="interest-name">Musik</div>
-                        </div>
-                        <div class="interest-card" data-theme="prinsessor">
-                            <span class="interest-emoji">👑</span>
-                            <div class="interest-name">Prinsessor</div>
-                        </div>
-                        <div class="interest-card" data-theme="pyssel">
-                            <span class="interest-emoji">🎨</span>
-                            <div class="interest-name">Pyssel</div>
-                        </div>
-                        <div class="interest-card" data-theme="fotboll">
-                            <span class="interest-emoji">⚽</span>
-                            <div class="interest-name">Fotboll</div>
-                        </div>
-                        <div class="interest-card" data-theme="superhjaltar">
-                            <span class="interest-emoji">🦸</span>
-                            <div class="interest-name">Superhjältar</div>
-                        </div>
-                    </div>
-
-                    <div class="category-header premium-themes">🔒 Premium</div>
-                    <div class="interests-grid" id="premium-themes">
-                        <div class="interest-card premium" data-theme="minecraft">
-                            <span class="lock-icon">🔒</span>
-                            <span class="interest-emoji">⛏️</span>
-                            <div class="interest-name">Minecraft</div>
-                        </div>
-                        <div class="interest-card premium" data-theme="dans">
-                            <span class="lock-icon">🔒</span>
-                            <span class="interest-emoji">💃</span>
-                            <div class="interest-name">Dans</div>
-                        </div>
-                        <div class="interest-card premium" data-theme="bilar">
-                            <span class="lock-icon">🔒</span>
-                            <span class="interest-emoji">🚗</span>
-                            <div class="interest-name">Bilar</div>
-                        </div>
-                        <div class="interest-card premium" data-theme="djur">
-                            <span class="lock-icon">🔒</span>
-                            <span class="interest-emoji">🐨</span>
-                            <div class="interest-name">Djur</div>
-                        </div>
-                        <div class="interest-card premium" data-theme="rymden">
-                            <span class="lock-icon">🔒</span>
-                            <span class="interest-emoji">🚀</span>
-                            <div class="interest-name">Rymden</div>
-                        </div>
-                        <div class="interest-card premium" data-theme="hastar">
-                            <span class="lock-icon">🔒</span>
-                            <span class="interest-emoji">🐴</span>
-                            <div class="interest-name">Hästar</div>
-                        </div>
-                        <div class="interest-card premium" data-theme="poliser">
-                            <span class="lock-icon">🔒</span>
-                            <span class="interest-emoji">👮</span>
-                            <div class="interest-name">Poliser</div>
-                        </div>
-                        <div class="interest-card premium" data-theme="dinosaurier">
-                            <span class="lock-icon">🔒</span>
-                            <span class="interest-emoji">🦕</span>
-                            <div class="interest-name">Dinosaurier</div>
-                        </div>
-                    </div>
-                </div>
-                <div id="theme-confirmation" class="confirmation-message hidden"></div>
-            </div>
-
-            <div class="form-section">
-                <div class="section-title">👥 Antal barn som bjuds</div>
-                <input type="number" class="input-field" id="guestCount" placeholder="Antal barn..." min="1" max="30">
-            </div>
-
-            <div class="form-section">
-                <div class="section-title">💰 Budget</div>
-                <div class="budget-grid">
-                    <div class="budget-card" data-budget="lag">
-                        <div style="font-size: 2rem; margin-bottom: 10px;">💰</div>
-                        <div style="font-weight: bold;">Låg budget</div>
-                        <div style="color: #666;">300-500 kr</div>
-                    </div>
-                    <div class="budget-card" data-budget="medel">
-                        <div style="font-size: 2rem; margin-bottom: 10px;">💸</div>
-                        <div style="font-weight: bold;">Mellanbudget</div>
-                        <div style="color: #666;">500-1000 kr</div>
-                    </div>
-                    <div class="budget-card" data-budget="hog">
-                        <div style="font-size: 2rem; margin-bottom: 10px;">🏆</div>
-                        <div style="font-weight: bold;">Hög budget</div>
-                        <div style="color: #666;">1000+ kr</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-section">
-                <div class="section-title">📍 Var ska kalaset hållas?</div>
-                <div class="location-grid">
-                    <div class="location-card" data-location="hemma">
-                        <div style="font-size: 2rem; margin-bottom: 10px;">🏠</div>
-                        <div style="font-weight: bold;">Hemma</div>
-                    </div>
-                    <div class="location-card" data-location="utomhus">
-                        <div style="font-size: 2rem; margin-bottom: 10px;">🌳</div>
-                        <div style="font-weight: bold;">Utomhus</div>
-                    </div>
-                    <div class="location-card" data-location="lokal">
-                        <div style="font-size: 2rem; margin-bottom: 10px;">🏢</div>
-                        <div style="font-weight: bold;">I hyrd lokal</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-section">
-                <div class="section-title">🍽️ Matpreferenser (valfritt)</div>
-                <textarea class="input-field" id="foodPrefs" placeholder="T.ex. vegetariskt, allergier..." rows="3"></textarea>
-            </div>
-
-            <button class="submit-btn disabled" id="submit-btn">
-                ✨ Skapa mitt drömkalas! 🎉
-            </button>
-        </div>
-
-        <!-- Loading -->
-        <div id="loading-container" class="hidden">
-            <div class="loading">
-                <div class="loading-spinner"></div>
-                <h2>Skapar ditt perfekta kalas... ✨</h2>
-                <div style="color: #666;">
-                    <p>🎨 Väljer tema...</p>
-                    <p>🎲 Planerar aktiviteter...</p>
-                    <p>🧁 Förbereder meny...</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Results -->
-        <div id="results-container" class="hidden">
-            <div class="results">
-                <h1 style="text-align: center; color: #333; margin-bottom: 40px;">🎉 Ditt drömkalas är klart!</h1>
-                
-                <div class="result-section">
-                    <h3 id="theme-title">🎈 Tema</h3>
-                    <div id="theme-content"></div>
-                </div>
-
-                <div class="result-section">
-                    <h3>🎲 Lekförslag</h3>
-                    <div id="activities-content"></div>
-                </div>
-
-                <div class="result-section">
-                    <h3>💌 Inbjudningstext</h3>
-                    <div id="invitation-content"></div>
-                </div>
-
-                <div class="result-section">
-                    <h3>🧁 Fika & matförslag</h3>
-                    <div id="food-content"></div>
-                </div>
-
-                <div class="result-section">
-                    <h3>🛍️ Dekorationer och tillbehör</h3>
-                    <div id="accessories-content"></div>
-                </div>
-
-                <button class="new-party-btn" onclick="resetForm()">← Planera nytt kalas</button>
-            </div>
-        </div>
-
-        <!-- Premium Modal -->
-        <div id="premium-modal" class="premium-modal hidden">
-            <div class="premium-modal-content">
-                <h3>🔒 Detta tema ingår i Kalaskollen premium</h3>
-                <p>Lås upp fler teman, extra AI-innehåll och obegränsade inbjudningar.</p>
-                <ul class="premium-features">
-                    <li>✅ Tillgång till alla teman</li>
-                    <li>✅ Extra lekar, inbjudningar och fikaidéer</li>
-                    <li>✅ Obegränsat antal SMS/mail</li>
-                    <li>✅ Prioritetsupport</li>
-                </ul>
-                <button class="upgrade-btn" onclick="upgradeToPremium()">Uppgradera till Premium</button>
-                <button class="close-modal-btn" onclick="closePremiumModal()">Stäng</button>
-            </div>
-        </div>
+      </div>
     </div>
+  </div>
 
-    <script>
-        // Global state
-        let formData = {
-            age: '',
-            theme: '',
-            guestCount: '',
-            budget: '',
-            location: '',
-            foodPrefs: ''
-        };
+<script>
+const themeInfo = {
+  musik: {
+    label: 'Musik',
+    name: 'Musikalisk magi',
+    description: 'Ett rytmiskt kalas fyllt av musik, dans och kreativitet där barnen får utforska ljud och melodier!',
+    emoji: '🎵'
+  },
+  fotboll: {
+    label: 'Fotboll',
+    name: 'Fotbollsfest',
+    description: 'Ett energifyllt kalas med fotbollsaktiviteter och lagkänsla!',
+    emoji: '⚽'
+  },
+  prinsessa: {
+    label: 'Prinsessa',
+    name: 'Magisk prinsessbal',
+    description: 'Ett kungligt kalas med glitter, kronor och äventyr i sagolandet!',
+    emoji: '👑'
+  },
+  hastar: {
+    label: 'Hästar',
+    name: 'Häst och ridning',
+    description: 'Allt om hästar, ridning och stalliv!',
+    emoji: '🐴'
+  }
+};
 
-        let isPremium = localStorage.getItem('kalaskollen-premium') === 'true';
-        let currentInvitationIndex = 0;
+const freeThemes = [
+  { id: 'musik' },
+  { id: 'fotboll' },
+  { id: 'prinsessa' },
+  { id: 'hastar' }
+];
 
-        // Premium themes
-        const premiumThemes = ['minecraft', 'dans', 'bilar', 'djur', 'rymden', 'hastar', 'poliser', 'dinosaurier'];
+let selectedTheme = null;
+let kalasState = {};
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeEventListeners();
-            updatePremiumAccess();
-        });
+function renderForm(main) {
+  main.innerHTML = `
+    <form id="kalas-form" class="w-full flex flex-col gap-8" autocomplete="off">
+      <div class="rounded-2xl p-6 bg-white shadow-kalas border-2 border-kalasmint flex flex-col gap-3 mb-2">
+        <label for="age-input" class="font-poppins text-lg text-kalasblue flex items-center gap-2">Födelsedagsbarnets ålder <span class="text-kalascoral text-xl">🎂</span></label>
+        <input id="age-input" type="number" min="2" max="12" step="1"
+          class="w-full text-center py-2 px-4 rounded-xl border-2 border-kalasmint text-xl font-poppins focus:outline-none focus:border-kalasblue transition shadow"
+          placeholder="t.ex. 7" required>
+      </div>
+      <div class="rounded-2xl p-6 bg-white shadow-kalas border-2 border-kalasmint flex flex-col gap-3 mb-2">
+        <label for="guests-input" class="font-poppins text-lg text-kalasblue flex items-center gap-2">Antal gäster <span class="text-kalascoral text-xl">🧒</span></label>
+        <input id="guests-input" type="number" min="1" max="30" step="1"
+          class="w-full text-center py-2 px-4 rounded-xl border-2 border-kalasmint text-xl font-poppins focus:outline-none focus:border-kalasblue transition shadow"
+          placeholder="t.ex. 10" required>
+        <div class="flex gap-2 mt-2 flex-wrap">
+          ${[5,8,10,12,15].map(num => `
+            <button type="button" data-quick="${num}" class="kalas-btn px-3 py-1 rounded-full bg-kalasyellow text-kalasblue font-poppins font-semibold shadow hover:bg-kalasmint hover:text-kalasblue transition text-base">${num}</button>
+          `).join('')}
+        </div>
+      </div>
+      <div class="rounded-2xl p-6 bg-white shadow-kalas border-2 border-kalasmint flex flex-col gap-3 mb-2">
+        <label for="place-input" class="font-poppins text-lg text-kalasblue flex items-center gap-2">Plats för kalaset <span class="text-kalascoral text-xl">📍</span></label>
+        <select id="place-input" class="w-full py-2 px-4 rounded-xl border-2 border-kalasmint text-xl font-poppins focus:outline-none focus:border-kalasblue transition shadow" required>
+          <option value="">Välj plats...</option>
+          <option value="Hemma">Hemma</option>
+          <option value="Lekland">Lekland</option>
+          <option value="Utomhus">Utomhus</option>
+          <option value="Annat">Annat</option>
+        </select>
+      </div>
+      <div class="rounded-2xl p-6 bg-white shadow-kalas border-2 border-kalasmint flex flex-col gap-2">
+        <div class="font-poppins text-lg text-kalasblue mb-2 flex items-center gap-2">Välj tema <span class="text-kalascoral text-xl">🎨</span></div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-2">
+          ${freeThemes.map(theme => `
+            <div class="kalas-theme-card bg-white rounded-2xl p-4 flex flex-col items-center justify-center hover:shadow-lg transition group"
+              data-theme="${theme.id}" data-type="free" tabindex="0">
+              <div class="text-3xl mb-1">${themeInfo[theme.id].emoji}</div>
+              <div class="font-poppins font-semibold text-base text-kalasblue">${themeInfo[theme.id].label}</div>
+              <div class="text-xs font-inter text-gray-400 mt-1">Gratis</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="flex justify-center mt-2">
+        <button id="form-next" type="submit" class="kalas-btn px-10 py-3 rounded-full bg-kalasblue text-white font-poppins font-semibold text-lg shadow hover:bg-kalasyellow hover:text-kalasblue transition text-lg flex items-center gap-2">
+          <span>Skapa mitt drömkalas!</span> <span class="text-2xl">🚀</span>
+        </button>
+      </div>
+    </form>
+  `;
 
-        function initializeEventListeners() {
-            // Age input
-            document.getElementById('age').addEventListener('input', function(e) {
-                formData.age = e.target.value;
-                validateForm();
-            });
+  document.querySelectorAll('[data-quick]').forEach(btn => {
+    btn.onclick = (e) => {
+      e.preventDefault();
+      document.getElementById('guests-input').value = btn.getAttribute('data-quick');
+    }
+  });
 
-            // Guest count input
-            document.getElementById('guestCount').addEventListener('input', function(e) {
-                formData.guestCount = e.target.value;
-                validateForm();
-            });
+  function updateThemeSelection(themeId, type) {
+    document.querySelectorAll('.kalas-theme-card').forEach(card => card.classList.remove('selected'));
+    if(themeId) {
+      const el = document.querySelector(`.kalas-theme-card[data-theme="${themeId}"]`);
+      if(el) el.classList.add('selected');
+    }
+    selectedTheme = { theme: themeId, type };
+  }
+  document.querySelectorAll('.kalas-theme-card').forEach(card => {
+    card.onclick = () => {
+      const type = card.getAttribute('data-type');
+      const themeId = card.getAttribute('data-theme');
+      updateThemeSelection(themeId, type);
+    };
+    card.onkeydown = (e) => {
+      if(e.key === 'Enter' || e.key === ' ') card.click();
+    }
+  });
 
-            // Food preferences
-            document.getElementById('foodPrefs').addEventListener('input', function(e) {
-                formData.foodPrefs = e.target.value;
-            });
+  document.getElementById('kalas-form').onsubmit = (e) => {
+    e.preventDefault();
+    const age = parseInt(document.getElementById('age-input').value, 10);
+    const guests = parseInt(document.getElementById('guests-input').value, 10);
+    const place = document.getElementById('place-input').value;
+    if(isNaN(age) || age < 2 || age > 12) {
+      document.getElementById('age-input').focus();
+      return;
+    }
+    if(isNaN(guests) || guests < 1 || guests > 30) {
+      document.getElementById('guests-input').focus();
+      return;
+    }
+    if(!place) {
+      document.getElementById('place-input').focus();
+      return;
+    }
+    if(!selectedTheme || !selectedTheme.theme) {
+      document.querySelector('.kalas-theme-card').focus();
+      return;
+    }
+    kalasState = { age, guests, place, theme: selectedTheme.theme };
+    showLoading(() => renderResult(document.getElementById('spa-content'), kalasState));
+  }
+}
 
-            // Theme selection
-            document.querySelectorAll('.interest-card').forEach(card => {
-                card.addEventListener('click', function() {
-                    const theme = this.dataset.theme;
-                    const isPremiumTheme = premiumThemes.includes(theme);
-                    
-                    if (isPremiumTheme && !isPremium) {
-                        showPremiumModal();
-                        return;
-                    }
-                    
-                    selectTheme(theme);
-                });
-            });
+// --- Snygg laddningssida ---
+function showLoading(cb) {
+  const loader = document.getElementById('loading-container');
+  loader.classList.remove('hidden');
+  setTimeout(() => {
+    loader.classList.add('hidden');
+    cb();
+  }, 1800);
+}
 
-            // Budget selection
-            document.querySelectorAll('.budget-card').forEach(card => {
-                card.addEventListener('click', function() {
-                    document.querySelectorAll('.budget-card').forEach(c => c.classList.remove('selected'));
-                    this.classList.add('selected');
-                    formData.budget = this.dataset.budget;
-                    validateForm();
-                });
-            });
+// --- Dynamisk logik för lekar, meny, tips, inköp, inbjudan ---
+function getKalasData({age, guests, place, theme}) {
+  let games = [], menu = [], shopping = [], tips = [], invite = '';
+  if(theme === 'musik') {
+    if(place === 'Hemma') {
+      games = [
+        { title: "Dansstopp", desc: "Dans till musik – när musiken stannar gäller det att stå still!", instructions: "Spela musik, pausa plötsligt – alla måste frysa. Den som rör sig åker ut.", props: "Musikspelare" },
+        { title: "Musikquiz", desc: "Gissa låtar!", instructions: "Spela korta låtsnuttar, låt barnen gissa.", props: "Spellista, högtalare" },
+        { title: "Karaoke", desc: "Sjung favoritlåtar tillsammans!", instructions: "Ställ fram mikrofon/leksaksmick och låt barnen sjunga.", props: "Mikrofon" }
+      ];
+      menu = ["Fruktspett med noter", "Sockervadd", "Minipizzor", "Saft i färgglada muggar"];
+    } else if(place === 'Utomhus') {
+      games = [
+        { title: "Musikstafett", desc: "Spring till musiken!", instructions: "Lek stafett där barnen springer när musiken spelas och fryser när den stannar.", props: "Bluetooth-högtalare" },
+        { title: "Sångstafett", desc: "Spring och sjung!", instructions: "Dela in i lag, spring till en punkt och sjung en sångrad.", props: "Ingen rekvisita" }
+      ];
+      menu = ["Picknickmackor", "Smoothies", "Fruktspett"];
+    } else {
+      games = [
+        { title: "Disco i lokalen", desc: "Dansgolv med blinkande lampor!", instructions: "Släck ner, spela musik, dansa loss.", props: "Diskolampa, musik" },
+        { title: "Limbo", desc: "Hur lågt kan du gå?", instructions: "Använd ett snöre, alla turas om.", props: "Snöre" }
+      ];
+      menu = ["Pizza-bitar", "Glassbuffé", "Saft"];
+    }
+    shopping = ["Högtalare", "Musikspellista", "Mikrofon", "Ballonger", "Tårta", "Servetter", "Dekorationer", "Presentpåsar", "Kalashattar"];
+  }
+  else if(theme === 'fotboll') {
+    if(place === 'Utomhus') {
+      games = [
+        { title: "Straffsparks-tävling", desc: "Vem sätter flest straffar?", instructions: "Ställ upp mål, låt barnen skjuta straffar.", props: "Fotboll, mål" },
+        { title: "Dribblingsbana", desc: "Snabbast genom konbanan vinner!", instructions: "Bygg bana med koner, tidtagning.", props: "Koner" }
+      ];
+      menu = ["Korv med bröd", "Sportdryck", "Frukt"];
+    } else if(place === 'Hemma') {
+      games = [
+        { title: "Inomhus-fotboll", desc: "Mjuk fotboll på liten yta!", instructions: "Spela med mjuk boll, små mål.", props: "Mjuk boll, tejpade mål" },
+        { title: "Fotbollsbingo", desc: "Gissa resultat och vinn!", instructions: "Låt barnen gissa utfall av små matcher.", props: "Papper, pennor" }
+      ];
+      menu = ["Mini-pizzor", "Saft", "Fotbollstårta"];
+    } else {
+      games = [
+        { title: "Bollstafett", desc: "Spring med boll på hinderbana!", instructions: "Balansera boll, spring bana.", props: "Bollar" }
+      ];
+      menu = ["Tårta", "Saft", "Frukt"];
+    }
+    shopping = ["Fotboll", "Mål", "Koner", "Visselpipa", "Ballonger", "Tårta", "Servetter", "Dekorationer", "Presentpåsar"];
+  }
+  else if(theme === 'prinsessa') {
+    games = [
+      { title: "Skattjakt i slottet", desc: "Leta efter gömda skatter!", instructions: "Göm små skatter, ge ledtrådar.", props: "Små skatter, ledtrådar" },
+      { title: "Krona-pyssel", desc: "Skapa egna prinsesskronor!", instructions: "Dela ut papper, glitter, lim.", props: "Papper, glitter, lim" }
+    ];
+    menu = ["Rosa cupcakes", "Prinsesstårta", "Saft i fina glas", "Jordgubbar"];
+    shopping = ["Kronor", "Glitter", "Ballonger", "Tårta", "Servetter", "Dekorationer", "Presentpåsar", "Kalashattar"];
+  }
+  else if(theme === 'hastar') {
+    games = [
+      { title: "Hästskor-kastning", desc: "Träffa målet med hästskor!", instructions: "Ställ upp ringar, kasta hästskor.", props: "Plasthästskor, ringar" },
+      { title: "Pinntävling", desc: "Bygg egna käpphästar och tävla!", instructions: "Pyssla käpphästar, ha hinderbana.", props: "Pinnar, tyg, snöre" }
+    ];
+    menu = ["Morotsstavar", "Hästformade kakor", "Saft", "Smörgåsrullar"];
+    shopping = ["Käpphästar", "Ballonger", "Tårta", "Servetter", "Dekorationer", "Presentpåsar", "Kalashattar"];
+  }
+  tips = [
+    "Ha alltid en backup-lek om barnen tröttnar",
+    "Förbered lekar i tid – helst dagen innan",
+    "Städa ytor som ska användas",
+    "Ha våtservetter och extra plastpåsar redo"
+  ];
 
-            // Location selection
-            document.querySelectorAll('.location-card').forEach(card => {
-                card.addEventListener('click', function() {
-                    document.querySelectorAll('.location-card').forEach(c => c.classList.remove('selected'));
-                    this.classList.add('selected');
-                    formData.location = this.dataset.location;
-                    validateForm();
-                });
-            });
+  invite = `🎉 Du är bjuden på ${themeInfo[theme]?.name || theme}! 🎉
 
-            // Submit button
-            document.getElementById('submit-btn').addEventListener('click', function() {
-                if (isFormValid()) {
-                    generateParty();
-                }
-            });
-        }
+När: [Datum och tid]
+Var: ${place}
+Vi firar ${age}-årsdagen med ${guests} barn, lekar, ${menu[0] ? menu[0].toLowerCase() : "gott fika"} och massor av kul!
 
-        function selectTheme(theme) {
-            document.querySelectorAll('.interest-card').forEach(c => c.classList.remove('selected'));
-            document.querySelector(`[data-theme="${theme}"]`).classList.add('selected');
-            formData.theme = theme;
-            
-            const confirmation = document.getElementById('theme-confirmation');
-            const emoji = document.querySelector(`[data-theme="${theme}"] .interest-emoji`).textContent;
-            const name = document.querySelector(`[data-theme="${theme}"] .interest-name`).textContent;
-            
-            confirmation.textContent = `Temat ${emoji} ${name} är valt! AI:n anpassar nu lekar, inbjudningar och kalasidéer.`;
-            confirmation.classList.remove('hidden');
-            
-            validateForm();
-        }
+OSA till [ditt namn/nummer]
+Välkommen!`;
 
-        function validateForm() {
-            const isValid = formData.age && formData.theme && formData.guestCount && formData.budget && formData.location;
-            const submitBtn = document.getElementById('submit-btn');
-            
-            if (isValid) {
-                submitBtn.classList.remove('disabled');
-                submitBtn.classList.add('enabled');
-            } else {
-                submitBtn.classList.remove('enabled');
-                submitBtn.classList.add('disabled');
-            }
-        }
+  return { games, menu, shopping, tips, invite };
+}
 
-        function isFormValid() {
-            return formData.age && formData.theme && formData.guestCount && formData.budget && formData.location;
-        }
+function renderResult(main, state) {
+  const themeObj = themeInfo[state.theme] || { name: state.theme, emoji: '🎉', description: '' };
+  const data = getKalasData(state);
+  main.innerHTML = `
+    <section class="flex flex-col gap-6 fade-in">
+      <div class="rounded-2xl bg-white shadow-kalas border-2 border-kalasmint flex flex-wrap items-center gap-4 px-6 py-4 justify-between">
+        <div class="flex items-center gap-2 font-poppins text-lg">
+          <span class="text-2xl">${themeObj.emoji}</span>
+          <span><span class="font-semibold text-kalasblue">Tema:</span> ${themeObj.name}</span>
+        </div>
+        <div class="font-poppins text-lg"><span class="font-semibold text-kalasblue">Ålder:</span> ${state.age} år</div>
+        <div class="font-poppins text-lg"><span class="font-semibold text-kalasblue">Antal gäster:</span> ${state.guests} barn</div>
+        <div class="font-poppins text-lg"><span class="font-semibold text-kalasblue">Plats:</span> ${state.place}</div>
+      </div>
+      <div class="rounded-2xl bg-kalasyellow/30 border-2 border-kalasyellow shadow p-4 flex items-center gap-4">
+        <span class="text-3xl">${themeObj.emoji}</span>
+        <div>
+          <div class="font-poppins font-semibold text-kalasblue text-lg">${themeObj.name}</div>
+          <div class="font-inter text-base text-kalasblue">${themeObj.description}</div>
+        </div>
+      </div>
+      <div class="rounded-2xl bg-white shadow-kalas border-2 border-kalasyellow p-5">
+        <h3 class="font-poppins text-xl text-kalascoral mb-2 flex items-center gap-2">🎲 Lekar & aktiviteter</h3>
+        <div class="flex flex-col gap-3">
+          ${data.games.map(game => `
+            <div class="bg-kalasmint/60 rounded-lg p-3 shadow">
+              <div class="font-poppins font-semibold text-kalasblue">${game.title}</div>
+              <div class="text-sm text-gray-700 mb-1">${game.desc}</div>
+              <div class="text-xs text-gray-500">Instruktion: ${game.instructions}</div>
+              <div class="text-xs text-gray-500">Rekvisita: ${game.props}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="rounded-2xl bg-white shadow-kalas border-2 border-kalasyellow p-5">
+        <h3 class="font-poppins text-xl text-kalascoral mb-2 flex items-center gap-2">🍰 Menyförslag</h3>
+        <ul class="list-disc ml-5 text-gray-700">
+          ${data.menu.map(item => `<li>${item}</li>`).join('')}
+        </ul>
+      </div>
+      <div class="rounded-2xl bg-white shadow-kalas border-2 border-kalasyellow p-5">
+        <h3 class="font-poppins text-xl text-kalascoral mb-2 flex items-center gap-2">🛒 Inköpslista</h3>
+        <ul class="flex flex-col gap-1">
+          ${data.shopping.map(item => `
+            <li>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" class="kalas-checkbox accent-kalasyellow w-4 h-4 rounded" />
+                <span class="transition">${item}</span>
+              </label>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+      <div class="rounded-2xl bg-white shadow-kalas border-2 border-kalasyellow p-5">
+        <h3 class="font-poppins text-xl text-kalascoral mb-2 flex items-center gap-2">📝 Kom ihåg!</h3>
+        <ul class="list-disc ml-5 text-gray-700">
+          ${data.tips.map(tip => `<li>${tip}</li>`).join('')}
+        </ul>
+      </div>
+      <div class="rounded-2xl bg-white shadow-kalas border-2 border-kalasyellow p-5 flex flex-col gap-3">
+        <h3 class="font-poppins text-xl text-kalascoral mb-2 flex items-center gap-2">💌 Inbjudningskort</h3>
+        <div id="invite-text" class="kalas-invite font-inter text-kalasblue text-base mb-2">${data.invite.replace(/\n/g, "<br>")}</div>
+        <div class="flex flex-wrap gap-2">
+          <button class="kalas-btn bg-kalasyellow text-kalasblue px-4 py-2 rounded-full font-poppins font-semibold" onclick="copyInvite()">Kopiera</button>
+          <a class="kalas-btn bg-kalasmint text-kalasblue px-4 py-2 rounded-full font-poppins font-semibold" href="mailto:?subject=Inbjudan till kalas!&body=${encodeURIComponent(data.invite)}">Maila</a>
+          <a class="kalas-btn bg-kalascoral text-white px-4 py-2 rounded-full font-poppins font-semibold" href="sms:?body=${encodeURIComponent(data.invite)}">SMS</a>
+        </div>
+      </div>
+      <div class="mt-2 flex flex-col items-center">
+        <div class="font-poppins text-xl text-kalasblue mb-2">Ditt drömkalas är klart – du är en kalasmästare! 🎉</div>
+        <button id="start-over" class="kalas-btn px-6 py-2 rounded-full bg-kalasyellow text-kalasblue font-poppins font-semibold text-base shadow hover:bg-kalasmint transition mt-2">Planera nytt kalas</button>
+      </div>
+    </section>
+  `;
+  document.getElementById('start-over').onclick = () => {
+    renderForm(document.getElementById('spa-content'));
+  }
+}
 
-        function generateParty() {
-            document.getElementById('form-container').classList.add('hidden');
-            document.getElementById('loading-container').classList.remove('hidden');
+window.copyInvite = function() {
+  const el = document.getElementById('invite-text');
+  let text = el.innerText;
+  navigator.clipboard.writeText(text);
+  el.style.background = "#A8E6CF";
+  setTimeout(()=>{el.style.background="#FAF7F2";}, 600);
+}
 
-            setTimeout(() => {
-                generateContent();
-                document.getElementById('loading-container').classList.add('hidden');
-                document.getElementById('results-container').classList.remove('hidden');
-            }, 3000);
-        }
-
-        function generateContent() {
-            const age = parseInt(formData.age);
-            const theme = formData.theme;
-            const budget = formData.budget;
-            
-            // Generate theme content
-            generateThemeContent(theme);
-            
-            // Generate activities
-            generateActivities(theme, age);
-            
-            // Generate invitation
-            generateInvitation(theme);
-            
-            // Generate food suggestions
-            generateFoodSuggestions(theme, budget);
-            
-            // Generate accessories
-            generateAccessories(theme, budget);
-        }
-
-        function generateThemeContent(theme) {
-            const themes = {
-                musik: {
-                    name: 'Musikalisk magi',
-                    description: 'Ett rytmiskt kalas fyllt av musik, dans och kreativitet där barnen får utforska ljud och melodier!',
-                    emoji: '🎵'
-                },
-                prinsessor: {
-                    name: 'Magisk prinsessbal',
-                    description: 'Ett kungligt kalas med glitter, kronor och äventyr i sagolandet!',
-                    emoji: '👑'
-                },
-                pyssel: {
-                    name: 'Kreativa verkstan',
-                    description: 'Ett kalas där fantasin får flöda fritt genom pysslande och skapande!',
-                    emoji: '🎨'
-                },
-                fotboll: {
-                    name: 'Fotbollsfest',
-                    description: 'Ett energifyllt kalas med fotbollsaktiviteter och lagkänsla!',
-                    emoji: '⚽'
-                },
-                superhjaltar: {
-                    name: 'Superhjälte akademi',
-                    description: 'Träna era superkrafter och rädda världen tillsammans!',
-                    emoji: '🦸'
-                },
-                minecraft: {
-                    name: 'Blocky builder adventure',
-                    description: 'Bygg, utforska och skapa i Minecraft-världen!',
-                    emoji: '⛏️'
-                },
-                dans: {
-                    name: 'Dansparti deluxe',
-                    description: 'Ett energifyllt kalas med dans, musik och show!',
-                    emoji: '💃'
-                },
-                bilar: {
-                    name: 'Racing championship',
-                    description: 'Kör fort och ha kul med bilar och racing!',
-                    emoji: '🚗'
-                },
-                djur: {
-                    name: 'Djuräventyr',
-                    description: 'Utforska djurriket och lär er om olika djur!',
-                    emoji: '🐨'
-                },
-                rymden: {
-                    name: 'Rymdäventyr',
-                    description: 'Res till rymden och utforska planeter och stjärnor!',
-                    emoji: '🚀'
-                },
-                hastar: {
-                    name: 'Häst och ridning',
-                    description: 'Allt om hästar, ridning och stalliv!',
-                    emoji: '🐴'
-                },
-                poliser: {
-                    name: 'Polisstation',
-                    description: 'Lös mysterier och håll ordning som riktiga poliser!',
-                    emoji: '👮'
-                },
-                dinosaurier: {
-                    name: 'Jurassic adventure',
-                    description: 'Upptäck dinosauriernas värld och bli paleontologer!',
-                    emoji: '🦕'
-                }
-            };
-
-            const themeData = themes[theme];
-            const content = `
-                <div style="text-align: center; padding: 20px;">
-                    <div style="font-size: 4rem; margin-bottom: 15px;">${themeData.emoji}</div>
-                    <h2 style="color: #ff6b6b; margin-bottom: 10px;">${themeData.name}</h2>
-                    <p style="font-size: 1.1rem; color: #666;">${themeData.description}</p>
-                </div>
-            `;
-            
-            document.getElementById('theme-content').innerHTML = content;
-            document.getElementById('theme-title').innerHTML = `${themeData.emoji} ${themeData.name}`;
-        }
-
-        function generateActivities(theme, age) {
-            const activities = getActivitiesForTheme(theme, age, formData.location);
-            
-            let html = '';
-            activities.forEach(activity => {
-                html += `
-                    <div class="activity-item">
-                        <div class="activity-name">${activity.name}</div>
-                        <div class="activity-description">${activity.description}</div>
-                        <div class="activity-instructions">
-                            <strong>📋 Instruktioner:</strong><br>
-                            ${activity.instructions}
-                        </div>
-                        <div class="activity-materials">
-                            <strong>🛠️ Material:</strong> ${activity.materials}
-                        </div>
-                        <div class="activity-duration">⏱️ ${activity.duration}</div>
-                    </div>
-                `;
-            });
-            
-            document.getElementById('activities-content').innerHTML = html;
-        }
-
-        function getActivitiesForTheme(theme, age, location) {
-            const ageGroup = age <= 5 ? 'small' : age <= 8 ? 'medium' : 'large';
-            
-            const activities = {
-                musik: {
-                    small: {
-                        hemma: [
-                            {
-                                name: 'Musikstopp inomhus',
-                                description: 'När musiken stannar fryser alla i roliga poser.',
-                                instructions: 'Spela musik från telefon/tablet. Barnen dansar fritt i vardagsrummet. Pausa musiken oväntat. Alla måste frysa. Den som rör sig får ge nästa pose-förslag.',
-                                materials: 'Bluetoothhögtalare eller telefon',
-                                duration: '15 min'
-                            },
-                            {
-                                name: 'Djurljud-dans',
-                                description: 'Barn imiterar olika djur till musik och dansar som djuren gör.',
-                                instructions: 'Spela lugn musik och ropa ut olika djur. Barnen dansar och låter som djuret. Växla mellan katt, elefant, fågel. Perfekt för vardagsrum.',
-                                materials: 'Bluetoothhögtalare, lista på djur',
-                                duration: '15 min'
-                            }
-                        ],
-                        utomhus: [
-                            {
-                                name: 'Musikparad utomhus',
-                                description: 'Marschera runt i trädgården med hemmagjorda instrument.',
-                                instructions: 'Gör enkla instrument (skramla i burkar, tamburin av papptallrikar). Marschera i kö runt trädgården till musik. Barnen turas om att leda paraden.',
-                                materials: 'Burkar, ris, papptallrikar, tejp, portabel högtalare',
-                                duration: '20 min'
-                            },
-                            {
-                                name: 'Naturens musik',
-                                description: 'Upptäck ljud i naturen och skapa musik med naturmaterial.',
-                                instructions: 'Samla pinnar, stenar, löv. Experimentera med ljud - klappa pinnar, raschla löv, släppa stenar i hinkar. Skapa "naturorkester".',
-                                materials: 'Hinkar, naturmaterial, portabel högtalare',
-                                duration: '25 min'
-                            }
-                        ],
-                        lokal: [
-                            {
-                                name: 'Stor musikcirkel',
-                                description: 'Alla sitter i stor cirkel och sjunger tillsammans.',
-                                instructions: 'Stora lokalen ger plats för stor cirkel. Sjung bekanta barnvisor. Använd enkla rörelser. Låt barnen föreslå låtar.',
-                                materials: 'Ljudanläggning i lokalen, sångbok',
-                                duration: '20 min'
-                            }
-                        ]
-                    },
-                    medium: {
-                        hemma: [
-                            {
-                                name: 'Hemmagjorda instrument-verkstad',
-                                description: 'Tillverka riktiga instrument av återvinning i köket.',
-                                instructions: 'Station vid köksbordet: Maracas av tomma yoghurtburkar + ris. Gitarrer av skokartonger + gummiband. Trummor av konservburkar + ballonger som trumskinn.',
-                                materials: 'Yoghurtburkar, ris, skokartonger, gummiband, konservburkar, ballonger',
-                                duration: '30 min'
-                            }
-                        ],
-                        utomhus: [
-                            {
-                                name: 'Utomhus-karaoke',
-                                description: 'Karaoke i trädgården med naturlig akustik.',
-                                instructions: 'Sätt upp portabel karaoke-högtalare. Skapa "scen" med filt eller matta. Barnen turas om att sjunga favoritlåtar. Andra sitter på gräset och hejar.',
-                                materials: 'Karaoke-högtalare, mikrofon, filt, förlängningssladd',
-                                duration: '25 min'
-                            }
-                        ],
-                        lokal: [
-                            {
-                                name: 'Stor musikproduktion',
-                                description: 'Skapa musikal med roller och dans.',
-                                instructions: 'Dela in i grupper: sångare, dansare, instrument. Öva in enkel musikal baserat på bekant saga. Framför för varandra i lokalens stora utrymme.',
-                                materials: 'Lokalens ljudsystem, enkla kostymer, rekvisita',
-                                duration: '35 min'
-                            }
-                        ]
-                    },
-                    large: {
-                        hemma: [
-                            {
-                                name: 'Hemma-DJ-studio',
-                                description: 'Lär grunderna i DJ-mixning hemma vid datorn.',
-                                instructions: 'Använd gratis DJ-app på dator/tablet. Lär fade in/out, beatmatching. Varje barn får 3 min att "mixa". Andra lyssnar via hörlurar och ger feedback.',
-                                materials: 'Dator/tablet, DJ-app, hörlurar, Bluetooth-högtalare',
-                                duration: '30 min'
-                            }
-                        ],
-                        utomhus: [
-                            {
-                                name: 'Utomhus-dansfest',
-                                description: 'Stor dansfest i trädgården med ljud och ljus.',
-                                instructions: 'Sätt upp kraftig musikanläggning utomhus. Skapa dansområde på gräs/terass. Lägg till disco-ljus om det är kväll. Arrangera danskonkurrens.',
-                                materials: 'Kraftig högtalare, förlängningssladd, disco-ljus, ljudlista',
-                                duration: '40 min'
-                            }
-                        ],
-                        lokal: [
-                            {
-                                name: 'Professionell musikstudio',
-                                description: 'Använd lokalens utrustning för att spela in egen låt.',
-                                instructions: 'Om lokalen har bra ljudsystem, spela in gemensam låt. Dela roller: rappare, sångare, beatbox. Spela in med telefon. Lyssna på resultatet tillsammans.',
-                                materials: 'Lokalens ljudsystem, telefon för inspelning, mikrofoner',
-                                duration: '45 min'
-                            }
-                        ]
-                    }
-                },
-                fotboll: {
-                    small: {
-                        hemma: [
-                            {
-                                name: 'Fotbollsbowling inomhus',
-                                description: 'Rulla mjuk fotboll mot plastflaskor i korridoren.',
-                                instructions: 'Ställ upp tomma plastflaskor i korridoren eller vardagsrummet. Använd mjuk inomhusboll. Barnen rullar bollen försiktigt mot "käglorna".',
-                                materials: 'Mjuk inomhusboll, 6-10 plastflaskor',
-                                duration: '15 min'
-                            }
-                        ],
-                        utomhus: [
-                            {
-                                name: 'Mini-fotbollsmatch',
-                                description: 'Äkta fotboll på gräsmattan med små mål.',
-                                instructions: 'Sätt upp små mål (köp eller improvisera med koner). Spela 2 mot 2 eller 3 mot 3. Korta matcher (5 min). Alla får vara målvakt.',
-                                materials: 'Fotboll, små mål eller koner, eventuellt nätverk',
-                                duration: '25 min'
-                            }
-                        ],
-                        lokal: [
-                            {
-                                name: 'Inomhusfotboll med mjuka bollar',
-                                description: 'Fotboll i stor lokal med säkra mjuka bollar.',
-                                instructions: 'Använd mjuka skumbollar eller ballonger. Markera mål med tejp på vägg. Spela försiktigt för att inte skada inredning.',
-                                materials: 'Mjuka skumbollar, tejp för målmarkering',
-                                duration: '20 min'
-                            }
-                        ]
-                    },
-                    medium: {
-                        hemma: [
-                            {
-                                name: 'Fotbollsskicklighetstävling',
-                                description: 'Tekniktävling i trädgården med hinderbanor.',
-                                instructions: 'Sätt upp koner för dribling. Skjut på små mål från olika avstånd. Jonglering-utmaning. Tidstagning för varje station.',
-                                materials: 'Fotboll, koner, små mål, tidtagarur',
-                                duration: '30 min'
-                            }
-                        ],
-                        utomhus: [
-                            {
-                                name: 'Fotbollsolympiad',
-                                description: 'Flera fotbollsstationer utomhus med olika utmaningar.',
-                                instructions: 'Station 1: Målskytte. Station 2: Dribling. Station 3: Inlägg. Station 4: Straff. Rotera mellan stationer. Alla vinner medaljer.',
-                                materials: 'Fotbollar, koner, mål, medaljer, station-skyltar',
-                                duration: '35 min'
-                            }
-                        ],
-                        lokal: [
-                            {
-                                name: 'Inomhus-fotbollsturnering',
-                                description: 'Organiserad turnering i stor lokal med lag.',
-                                instructions: 'Dela in i lag. Spela korta matcher (7 min). Gruppspel följt av semifinal och final. Använd mindre bollar för inomhusytan.',
-                                materials: 'Inomhusbollar, mål, domarvissla, poängtavla',
-                                duration: '40 min'
-                            }
-                        ]
-                    },
-                    large: {
-                        hemma: [
-                            {
-                                name: 'Fotbollsstrategi och analys',
-                                description: 'Lär fotbollstaktik och träna avancerade tekniker.',
-                                instructions: 'Rita upp taktik på whiteboard. Öva formationer. Diskutera professionella spelare. Kombinera teori med praktik i trädgården.',
-                                materials: 'Whiteboard, pennor, fotboll, koner för formationer',
-                                duration: '35 min'
-                            }
-                        ],
-                        utomhus: [
-                            {
-                                name: 'Fullskalig fotbollsmatch',
-                                description: 'Riktig 11-manna fotboll (anpassat efter antal barn).',
-                                instructions: 'Organisera riktig match med regler, domare, byten. Spela två halvlekar (15 min var). Alla får spela olika positioner.',
-                                materials: 'Fotboll, stora mål, domarvissla, positionsband',
-                                duration: '45 min'
-                            }
-                        ],
-                        lokal: [
-                            {
-                                name: 'Futsal-turnering',
-                                description: 'Professionell inomhusturnering med futsal-regler.',
-                                instructions: 'Lär futsal-regler (mindre lag, bouncing ball). Organisera professionell turnering med slutspel. Tidstagning och poängräkning.',
-                                materials: 'Futsal-boll, inomhusmål, tidtagarur, resultattavla',
-                                duration: '50 min'
-                            }
-                        ]
-                    }
-                },
-                prinsessor: {
-                    small: {
-                        hemma: [
-                            {
-                                name: 'Prinsessklädsel hemma',
-                                description: 'Klä ut sig till prinsessor med föräldrarnas kläder.',
-                                instructions: 'Använd föräldrarnas gamla kläder, smycken, skor. Hjälp barnen klä ut sig. Ta foton framför hemmets finaste bakgrund (trappa, bokhylla).',
-                                materials: 'Utklädningskläder, smycken, skor, kamera/telefon',
-                                duration: '20 min'
-                            }
-                        ],
-                        utomhus: [
-                            {
-                                name: 'Prinsess-trädgårdsäventyr',
-                                description: 'Leta efter "ädelstenar" och magiska ting i trädgården.',
-                                instructions: 'Gömma glittriga stenar, plast-ädelstenar i trädgården. Prinsessorna letar skatter. Skapa sagomiljö bland blommor och träd.',
-                                materials: 'Plastädelstenar, glitter, små hinkar för "skatter"',
-                                duration: '25 min'
-                            }
-                        ],
-                        lokal: [
-                            {
-                                name: 'Stort prinsessslott',
-                                description: 'Förvandla lokalen till ett slott med rum för olika aktiviteter.',
-                                instructions: 'Dela lokalen i "rum": sovrum, balsal, thronssal. Låt prinsessorna utforska och leka rollspel i olika delar.',
-                                materials: 'Slottdekorationer, skyltar för olika rum',
-                                duration: '30 min'
-                            }
-                        ]
-                    },
-                    medium: {
-                        hemma: [
-                            {
-                                name: 'Prinsess-sminkning hemma',
-                                description: 'Sminka varandra som prinsessor vid badrumsspegeln.',
-                                instructions: 'Använd ansiktsfärger och glitter. Sätt upp station vid badrumsbordet. Hjälp barnen sminka varandra. Ta innan/efter-foton.',
-                                materials: 'Ansiktsfärger, glitter, borstar, våtservetter',
-                                duration: '25 min'
-                            }
-                        ],
-                        utomhus: [
-                            {
-                                name: 'Prinsessäventyr i skogen',
-                                description: 'Äventyr utomhus där prinsessorna rädder djur och löser gåtor.',
-                                instructions: 'Skapa äventyrsresa i trädgården/skogen. Olika stationer med utmaningar: rädda enhörning, lösa trollgåta, hitta magisk blomma.',
-                                materials: 'Leksaksdjur, gåtor utskrivna, "magiska" föremål',
-                                duration: '35 min'
-                            }
-                        ],
-                        lokal: [
-                            {
-                                name: 'Kunglig hovbal',
-                                description: 'Organisera riktig bal med dans och etikett i stor lokal.',
-                                instructions: 'Lär hovdans och artighetsfraser. Arrangera bal med presentationer, dans, kunglig middag. Använd lokalens utrymme för stor dansyta.',
-                                materials: 'Klassisk musik, utklädning, "hovmannakläder", lokalens ljudsystem',
-                                duration: '40 min'
-                            }
-                        ]
-                    },
-                    large: {
-                        hemma: [
-                            {
-                                name: 'Prinsess-designer workshop',
-                                description: 'Designa och sy egna prinsessklänningar hemma.',
-                                instructions: 'Använd tygrester, tyll, band. Skapa enkla klänningar eller kjolar. Lär grundläggande sömnad. Modenschau hemma i vardagsrummet.',
-                                materials: 'Tyg, tyll, band, säkerhetsnålar, sax, symaskinshjälp från vuxen',
-                                duration: '45 min'
-                            }
-                        ],
-                        utomhus: [
-                            {
-                                name: 'Episkt prinsessäventyr',
-                                description: 'Stort äventyr med quests, dragar och riddare utomhus.',
-                                instructions: 'Skapa äventyrsberättelse med flera kapitel. Olika platser i trädgård/område = olika länder. Lös komplexa utmaningar, rädda kungariket.',
-                                materials: 'Kartunderlag, komplexa gåtor, kostymer för rollspel',
-                                duration: '60 min'
-                            }
-                        ],
-                        lokal: [
-                            {
-                                name: 'Prinsess-teaterproduktion',
-                                description: 'Skriv och framför egen prinsess-pjäs.',
-                                instructions: 'Skriv manus tillsammans. Dela roller: prinsessor, riddare, troll. Öva replik och rörelser. Framför för publik i lokalens stora utrymme.',
-                                materials: 'Papper för manus, kostymer, rekvisita, lokalens scen-möjligheter',
-                                duration: '50 min'
-                            }
-                        ]
-                    }
-                }
-            };
-
-            const themeActivities = activities[theme];
-            if (!themeActivities) return [];
-            
-            const ageActivities = themeActivities[ageGroup];
-            if (!ageActivities) return [];
-            
-            const locationActivities = ageActivities[location];
-            return locationActivities || ageActivities.hemma || [];
-        }
-
-        function generateInvitation(theme) {
-            const invitations = {
-                musik: [
-                    "🎵 Välkommen till ett kalas fyllt av rytmer, sång och skratt! Kom och dansa loss med oss! 🎶",
-                    "🎤 Hej musik-vänner! Vi bjuder in till ett kalas där vi ska sjunga, dansa och ha det så kul! 🎵",
-                    "🎶 Låt oss fira tillsammans med musik och dans! Ett kalas som kommer få alla att dansa! 🕺💃"
-                ],
-                prinsessor: [
-                    "👑 Du är inbjuden till en magisk prinsessbal! Kom i din finaste klänning och låt oss fira som riktiga kungligheter! ✨",
-                    "🏰 Välkommen till vårt sagoslott! Vi ska ha prinsessbal med dans, lek och magi! 👸",
-                    "💎 En kunglig inbjudan väntar dig! Kom och fira som en riktig prinsessa eller prins! 👑"
-                ],
-                pyssel: [
-                    "🎨 Kom och skapa magi med oss! Ett kalas fyllt av pyssel, färger och kreativitet väntar! ✂️",
-                    "🖌️ Alla konstnärer är välkomna! Vi ska pyssla, måla och skapa tillsammans! 🎨",
-                    "✂️ Tid för kreativitet! Kom med tomma händer, gå hem med konstverket du gjort! 🎨"
-                ],
-                fotboll: [
-                    "⚽ Fotbollskalas! Kom med fotbollsskor och glädje - vi ska spela, springa och ha kul! 🥅",
-                    "🏆 Välkommen till fotbollsfest! Kom som du är och var redo för action på planen! ⚽",
-                    "⚽ Dags för fotboll och skoj! Ta med dig sporthumöret och kom och fira med oss! 🏃‍♂️"
-                ]
-            };
-
-            const themeInvitations = invitations[theme] || [
-                "🎉 Du är inbjuden till ett super-kul kalas! Kom och fira med oss! 🎈"
-            ];
-
-            const invitation = themeInvitations[currentInvitationIndex % themeInvitations.length];
-            
-            const fullInvitation = `${invitation}
-
-📅 Datum: [Datum]
-🕐 Tid: 14:00-16:30
-📍 Plats: [Adress]
-🎈 Ålder: ${formData.age} år
-👥 Vi blir: ${formData.guestCount} barn
-
-OSA till [telefonnummer] senast [datum]
-
-Vi ses! 🎊`;
-
-            const html = `
-                <div class="invitation-box">
-                    <button class="copy-btn" onclick="copyInvitation()">Kopiera text</button>
-                    <pre id="invitation-text">${fullInvitation}</pre>
-                </div>
-                <button style="background: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-top: 10px;" onclick="generateNewInvitation('${theme}')">
-                    🔄 Generera ny inbjudan
-                </button>
-            `;
-            
-            document.getElementById('invitation-content').innerHTML = html;
-        }
-
-        function generateNewInvitation(theme) {
-            currentInvitationIndex++;
-            generateInvitation(theme);
-        }
-
-        function copyInvitation() {
-            const text = document.getElementById('invitation-text').textContent;
-            navigator.clipboard.writeText(text).then(() => {
-                const btn = document.querySelector('.copy-btn');
-                const originalText = btn.textContent;
-                btn.textContent = 'Kopierat! ✅';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                }, 2000);
-            });
-        }
-
-        function generateFoodSuggestions(theme, budget) {
-            const foods = {
-                musik: {
-                    lag: [
-                        { name: 'Musiknot-smörgåsar', description: 'Smörgåsar klippta som musiknoter', price: '💰', cost: '~80 kr' },
-                        { name: 'Rytm-popcorn', description: 'Hemgjord popcorn i musiktemat', price: '💰', cost: '~40 kr' }
-                    ],
-                    medel: [
-                        { name: 'Xylofon-fruktfat', description: 'Frukt arrangerat som xylofon i färgordning', price: '💸', cost: '~150 kr' },
-                        { name: 'Musiknot-muffins', description: 'Cupcakes med musiknoter i glasyr', price: '💸', cost: '~120 kr' }
-                    ],
-                    hog: [
-                        { name: 'DJ-tårta med chokladskivor', description: 'Professionell tårta designad som DJ-bord', price: '💎', cost: '~400 kr' },
-                        { name: 'Smoothie-bar med musik', description: 'Färgglada smoothies serverade med musik', price: '💎', cost: '~300 kr' }
-                    ]
-                },
-                prinsessor: {
-                    lag: [
-                        { name: 'Prinsess-smörgåsar', description: 'Smörgåsar i kronform', price: '💰', cost: '~90 kr' },
-                        { name: 'Rosa popcorn', description: 'Hemgjord rosa popcorn', price: '💰', cost: '~50 kr' }
-                    ],
-                    medel: [
-                        { name: 'Prinsess-cupcakes', description: 'Rosa cupcakes med kronor och glitter', price: '💸', cost: '~140 kr' },
-                        { name: 'Kunglig fruktdryck', description: 'Rosa lemonad med glitter', price: '💸', cost: '~100 kr' }
-                    ],
-                    hog: [
-                        { name: 'Slottstårta', description: 'Tårta formad som ett slott', price: '💎', cost: '~500 kr' },
-                        { name: 'Afternoon tea för barn', description: 'Minipajer, scones och te-koppar', price: '💎', cost: '~350 kr' }
-                    ]
-                }
-            };
-
-            const budgetFoods = foods[theme] ? foods[theme][budget] || foods[theme].medel : [
-                { name: 'Temaanpassade snacks', description: 'Enkla snacks anpassade efter temat', price: '💰', cost: '~100 kr' }
-            ];
-
-            let html = '';
-            budgetFoods.forEach(food => {
-                html += `
-                    <div class="food-item">
-                        <div>
-                            <div style="font-weight: bold;">${food.name}</div>
-                            <div style="color: #666; font-size: 0.9rem;">${food.description}</div>
-                            <div style="color: #888; font-size: 0.8rem;">${food.cost}</div>
-                        </div>
-                        <div class="price-tag">${food.price}</div>
-                    </div>
-                `;
-            });
-            
-            document.getElementById('food-content').innerHTML = html;
-        }
-
-        function generateAccessories(theme, budget) {
-            const accessories = {
-                musik: {
-                    lag: [
-                        { name: 'Musiknot-ballonger', description: 'Svarta ballonger med vita musiknoter', price: '💰', store: 'Panduro eller Dollarstore', cost: '~60 kr' },
-                        { name: 'Hem-DJ-station', description: 'Kartong gjord till DJ-bord', price: '💰', store: 'Hemmagjord av kartonger', cost: '~20 kr' }
-                    ],
-                    medel: [
-                        { name: 'Mini-discolampa', description: 'LED-lampa som projicerar färger', price: '💸', store: 'Elgiganten eller Clas Ohlson', cost: '~150 kr' },
-                        { name: 'Karaoke-mikrofon', description: 'Bluetooth-mikrofon för karaoke', price: '💸', store: 'Media Markt', cost: '~200 kr' }
-                    ],
-                    hog: [
-                        { name: 'Professionell DJ-utrustning', description: 'Hyra av riktigt DJ-bord', price: '💎', store: 'Hyra från Ljudia', cost: '~400 kr/dag' },
-                        { name: 'Live-band för barn', description: 'Musikband som spelar barnmusik', price: '💎', store: 'Booka via Barnunderhållning.se', cost: '~800 kr' }
-                    ]
-                }
-            };
-
-            const budgetAccessories = accessories[theme] ? accessories[theme][budget] || accessories[theme].medel : [
-                { name: 'Temaballonger', description: 'Ballonger i temats färger', price: '💰', store: 'Panduro', cost: '~50 kr' }
-            ];
-
-            let html = '';
-            budgetAccessories.forEach(item => {
-                html += `
-                    <div class="accessories-item">
-                        <div style="font-weight: bold; margin-bottom: 8px;">${item.name}</div>
-                        <div style="color: #666; margin-bottom: 5px;">${item.description}</div>
-                        <div style="font-size: 0.9rem; color: #888;">📍 ${item.store}</div>
-                        <div style="font-size: 0.9rem; color: #888;">💰 ${item.cost}</div>
-                        <div style="margin-top: 5px;">${item.price}</div>
-                    </div>
-                `;
-            });
-            
-            document.getElementById('accessories-content').innerHTML = html;
-        }
-
-        function showPremiumModal() {
-            document.getElementById('premium-modal').classList.remove('hidden');
-        }
-
-        function closePremiumModal() {
-            document.getElementById('premium-modal').classList.add('hidden');
-        }
-
-        function upgradeToPremium() {
-            // Simulate premium upgrade
-            localStorage.setItem('kalaskollen-premium', 'true');
-            isPremium = true;
-            updatePremiumAccess();
-            closePremiumModal();
-            
-            // Show success message
-            alert('Grattis! Du har nu Kalaskollen Premium! 🎉\nAlla teman är nu upplåsta!');
-        }
-
-        function updatePremiumAccess() {
-            if (isPremium) {
-                document.querySelectorAll('.interest-card.premium').forEach(card => {
-                    card.classList.remove('premium');
-                    const lockIcon = card.querySelector('.lock-icon');
-                    if (lockIcon) {
-                        lockIcon.remove();
-                    }
-                });
-            }
-        }
-
-        function resetForm() {
-            // Reset form data
-            formData = {
-                age: '',
-                theme: '',
-                guestCount: '',
-                budget: '',
-                location: '',
-                foodPrefs: ''
-            };
-            
-            // Reset form fields
-            document.getElementById('age').value = '';
-            document.getElementById('guestCount').value = '';
-            document.getElementById('foodPrefs').value = '';
-            
-            // Reset selections
-            document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
-            document.getElementById('theme-confirmation').classList.add('hidden');
-            
-            // Reset validation
-            validateForm();
-            
-            // Show form
-            document.getElementById('results-container').classList.add('hidden');
-            document.getElementById('form-container').classList.remove('hidden');
-            
-            // Reset invitation index
-            currentInvitationIndex = 0;
-        }
-    </script>
+renderForm(document.getElementById('spa-content'));
+</script>
 </body>
 </html>
